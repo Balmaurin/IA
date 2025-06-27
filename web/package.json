@@ -15,8 +15,12 @@
     "react-router-dom": "^6.30.1"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.13.5",
     "@types/react": "^18.2.50",
     "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.6.0",
+    "artillery": "^2.0.23",
+    "terser": "^5.43.1",
     "typescript": "^5.4.5",
     "vite": "^5.2.0"
   }

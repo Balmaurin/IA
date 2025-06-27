@@ -1,0 +1,9 @@
+apps
+llama3-env
+scripts
+sheily_config
+sheily_docs
+sheily_tests
+sheily_vault
+venv
+web
