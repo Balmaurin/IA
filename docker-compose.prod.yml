@@ -1,0 +1,34 @@
+
+version: '3.9'
+services:
+  api:
+    build: ./apps/sheily_light_api
+    command: uvicorn sheily_main_api:app --host 0.0.0.0 --port 8000
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  web:
+    build: ./web
+    env_file: .env
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: sheily
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+volumes:
+  pgdata:
+  ollama_data:

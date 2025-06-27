@@ -1,0 +1,26 @@
+# SHEILY-light – Ejemplo de configuración de entorno
+
+# Puerto del backend
+SHEILY_API_PORT=8000
+
+# Modelo por defecto para Ollama
+SHEILY_DEFAULT_MODEL=llama3
+
+# Ruta del vault cifrado
+SHEILY_VAULT_PATH=../sheily_vault/sheily_encrypted_token_vault.db
+
+# URL de SHEILY-central
+SHEILY_CENTRAL_URL=https://sheily-central.example.com/api
+
+# Habilitar telemetría
+SHEILY_TELEMETRY=true
+
+# Idioma por defecto
+SHEILY_DEFAULT_LANG=es
+
+# Feature flags
+SHEILY_ENABLE_AUTO_UPDATE=true
+SHEILY_ENABLE_FED_LEARNING=false
+SHEILY_ENABLE_BACKUP=true
+SHEILY_ENABLE_LOGS=true
+SHEILY_ENABLE_AUDIT=true
