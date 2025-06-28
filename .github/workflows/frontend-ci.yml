@@ -52,7 +52,7 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         directory: web/coverage/
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ secrets.CODECOV_TOKEN || '' }}
         fail_ci_if_error: false
 
   e2e-tests:
@@ -94,7 +94,7 @@ jobs:
         browser: chrome
         # La opción headless se configura a través de la variable de entorno
       env:
-        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY || '' }}
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY || 'none' }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Configurar Cypress para modo headless
         CYPRESS_HEADLESS: true

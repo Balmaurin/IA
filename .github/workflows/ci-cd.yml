@@ -6,11 +6,12 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-# Configuración de entornos
+# Default environment variables
 env:
   NODE_VERSION: '18'
   PYTHON_VERSION: '3.9'
   POSTGRES_VERSION: '15-alpine'
+  # These can be overridden in the repository's environment secrets
 
 jobs:
   # Trabajo para el backend en Python
@@ -19,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:${{ vars.POSTGRES_VERSION }}
+        image: postgres:${{ env.POSTGRES_VERSION }}
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
@@ -38,7 +39,7 @@ jobs:
     - name: Set up Python ${{ vars.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ vars.PYTHON_VERSION }}
+        python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install Python dependencies
       run: |
@@ -60,7 +61,7 @@ jobs:
       if: success() && github.event_name != 'pull_request'
       uses: codecov/codecov-action@v3
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ secrets.CODECOV_TOKEN || '' }}
         file: ./coverage.xml
         fail_ci_if_error: false
 
@@ -91,7 +92,7 @@ jobs:
     - name: Use Node.js ${{ vars.NODE_VERSION }}
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ vars.NODE_VERSION }}
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
     
     - name: Install dependencies
@@ -132,7 +133,7 @@ jobs:
     - name: Set up Python ${{ vars.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ vars.PYTHON_VERSION }}
+        python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Python dependencies
       run: |
@@ -142,7 +143,7 @@ jobs:
     - name: Install Node.js ${{ vars.NODE_VERSION }}
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ vars.NODE_VERSION }}
+        node-version: ${{ env.NODE_VERSION }}
     
     - name: Install frontend dependencies
       working-directory: ./web
@@ -174,7 +175,7 @@ jobs:
     - name: Add known hosts
       run: |
         mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.SSH_HOST || 'example.com' }} >> ~/.ssh/known_hosts
 
     - name: Deploy to production
       run: |
@@ -204,13 +205,15 @@ jobs:
 
     - name: Verify deployment
       run: |
-        curl -sSf https://${{ secrets.PRODUCTION_URL }}/health
+        if [ -n "${{ secrets.PRODUCTION_URL }}" ]; then
+          curl -sSf https://${{ secrets.PRODUCTION_URL }}/health
+        fi
         
     - name: Notify Slack
       if: always()
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
         SLACK_COLOR: ${{ job.status == 'success' && '#36a64f' || '#ff0000' }}
         SLACK_TITLE: 'Despliegue ${{ job.status }} - ${{ github.repository }}'
         SLACK_MESSAGE: 'Commit: ${{ github.sha }}\nMensaje: ${{ github.event.head_commit.message }}'
