@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="/home/yo/CascadeProyects/sheily-light/web/src/__tests__/components/Button.test.tsx">
+    <testCase name="Button Component renders button with default variant and size" duration="44"/>
+    <testCase name="Button Component applies custom className" duration="7"/>
+    <testCase name="Button Component handles click events" duration="8"/>
+  </file>
+</testExecutions>

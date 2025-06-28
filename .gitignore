@@ -44,9 +44,48 @@ yarn-error.log*
 *.db
 *.sqlite3
 
+# Test coverage and reports
+/coverage
+/coverage-*
+.nyc_output
+
+# JUnit test reports
+junit.xml
+junit-*.xml
+
 # Logs
 logs/
 *.log
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test results
+/test-results.json
+/test-results-*.json
+
+# Playwright
+/playwright-report/
+/playwright/.cache/
+/playwright/downloads/
+/playwright/test-results/
+
+# Cypress
+/cypress/videos/
+/cypress/screenshots/
+
+# Jest
+/jest-stare/
+/jest-html-reporters-attach/
+
+# Visual regression tests
+/regression-screenshots/
+/backstop_data/
+
+# Visual Studio Code test explorer
+.vscode-test/
 
 # Environment variables
 .env

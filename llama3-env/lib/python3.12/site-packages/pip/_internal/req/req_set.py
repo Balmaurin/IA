@@ -51,7 +51,10 @@ class RequirementSet:
     def has_requirement(self, name: str) -> bool:
         project_name = canonicalize_name(name)
 
-        return project_name in self.requirements and not self.requirements[project_name].constraint
+        return (
+            project_name in self.requirements
+            and not self.requirements[project_name].constraint
+        )
 
     def get_requirement(self, name: str) -> InstallRequirement:
         project_name = canonicalize_name(name)

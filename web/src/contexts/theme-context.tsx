@@ -36,13 +36,16 @@ export function ThemeProvider({
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
 
-  const isDark = theme === 'dark' || 
+  const isDark =
+    theme === 'dark' ||
     (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => {
+    setTheme((prevTheme) => {
       if (prevTheme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'light'
+          : 'dark';
         return systemTheme;
       }
       return prevTheme === 'dark' ? 'light' : 'dark';
@@ -85,8 +88,7 @@ export function ThemeProvider({
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
 
-  if (context === undefined)
-    throw new Error('useTheme must be used within a ThemeProvider');
+  if (context === undefined) throw new Error('useTheme must be used within a ThemeProvider');
 
   return context;
 };

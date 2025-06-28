@@ -1,0 +1,100 @@
+name: Frontend CI
+
+on:
+  push:
+    paths:
+      - 'web/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'web/**'
+      - '.github/workflows/frontend-ci.yml'
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'web/package-lock.json'
+
+    - name: Install dependencies
+      working-directory: ./web
+      run: npm ci
+
+    - name: Run linter
+      working-directory: ./web
+      run: npm run lint
+
+    - name: Run tests
+      working-directory: ./web
+      run: npm run test:ci
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: web/coverage/
+        retention-days: 7
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: web/coverage/
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
+
+  e2e-tests:
+    name: E2E Tests
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'web/package-lock.json'
+
+    - name: Install dependencies
+      working-directory: ./web
+      run: npm ci
+
+    - name: Run build
+      working-directory: ./web
+      run: npm run build
+
+    - name: Start server
+      working-directory: ./web
+      run: npm run preview -- --port 3000 &
+
+    - name: Run Cypress tests
+      uses: cypress-io/github-action@v5
+      with:
+        build: npm run build
+        start: npm run preview -- --port 3000
+        wait-on: 'http://localhost:3000'
+        browser: chrome
+        # La opción headless se configura a través de la variable de entorno
+      env:
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY || '' }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Configurar Cypress para modo headless
+        CYPRESS_HEADLESS: true

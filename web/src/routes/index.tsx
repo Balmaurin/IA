@@ -56,11 +56,11 @@ const withSuspense = (Component: React.ComponentType) => (
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   // TODO: Implementar lógica de autenticación
   const isAuthenticated = true; // Ejemplo: usar un hook de autenticación
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -68,11 +68,11 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
 const RequireAdmin = ({ children }: { children: React.ReactNode }) => {
   // TODO: Implementar lógica de autorización de administrador
   const isAdmin = true; // Ejemplo: verificar rol de administrador
-  
+
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   return <>{children}</>;
 };
 

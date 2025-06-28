@@ -48,10 +48,7 @@ export function Sidebar() {
             key={item.href}
             asChild
             variant={location.pathname === item.href ? 'secondary' : 'ghost'}
-            className={cn(
-              'w-full justify-start',
-              location.pathname === item.href && 'font-medium'
-            )}
+            className={cn('w-full justify-start', location.pathname === item.href && 'font-medium')}
           >
             <Link to={item.href} className="flex items-center">
               <span className={cn('mr-2 h-4 w-4', item.icon)} />
@@ -61,12 +58,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="border-t p-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start"
-          onClick={toggleTheme}
-        >
+        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={toggleTheme}>
           <span className="mr-2 h-4 w-4 i-lucide-moon" />
           {theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
         </Button>

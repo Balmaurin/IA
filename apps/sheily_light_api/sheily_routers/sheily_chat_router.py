@@ -5,10 +5,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from sheily_light_api.core.database import get_db, get_db_dep
-from sheily_light_api.models import User, ChatHistory
-from sheily_light_api.sheily_modules.sheily_auth_module.sheily_auth import (
-    get_current_user,
-)
+from sheily_light_api.models import User, ChatMessage
+from sheily_light_api.core.security import get_current_user
 from sheily_light_api.sheily_modules.sheily_chat_module.sheily_chat_service import (
     chat_with_local_ai,
     get_chat_history,

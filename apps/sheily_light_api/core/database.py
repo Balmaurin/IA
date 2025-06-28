@@ -24,11 +24,15 @@ if DB_URL.startswith("sqlite"):
     Base.metadata.create_all(bind=engine)
 
 
-@contextmanager
 def get_db():
-    """FastAPI dependency that yields a SQLAlchemy session and closes it once the request ends."""
-    db = SessionLocal()
+    """Dependency for FastAPI to get a database session."""
+    db = None
     try:
+        db = SessionLocal()
         yield db
     finally:
-        db.close()
+        if db is not None:
+            db.close()
+
+# Alias para compatibilidad con código existente
+get_db_dep = get_db

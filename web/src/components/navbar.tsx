@@ -13,10 +13,7 @@ export function Navbar() {
             <span className="font-bold">Sheily</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link
-              to="/"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
+            <Link to="/" className="transition-colors hover:text-foreground/80 text-foreground/60">
               Inicio
             </Link>
             <Link
@@ -38,12 +35,7 @@ export function Navbar() {
             {/* Search bar could go here */}
           </div>
           <nav className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            >
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
               {theme === 'dark' ? (
                 <span className="i-lucide-sun h-4 w-4" />
               ) : (
