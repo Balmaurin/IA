@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -8,6 +7,7 @@ from ..models import User
 from ..sheily_modules.sheily_backup_module.sheily_backup_manager import backup_manager
 
 router = APIRouter(prefix="/backup", tags=["backup"])
+
 
 class BackupRequest(BaseModel):
     password: str
@@ -25,6 +25,7 @@ async def create_backup(req: BackupRequest, user: User = Depends(get_current_use
     if not path:
         return {"detail": "backup error"}
     return {"backup_path": path}
+
 
 class RestoreRequest(BaseModel):
     backup_path: str

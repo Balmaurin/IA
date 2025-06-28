@@ -16,10 +16,7 @@ fault_handler_stderr_fd_key = StashKey[int]()
 
 
 def pytest_addoption(parser: Parser) -> None:
-    help = (
-        "Dump the traceback of all threads if a test takes "
-        "more than TIMEOUT seconds to finish"
-    )
+    help = "Dump the traceback of all threads if a test takes " "more than TIMEOUT seconds to finish"
     parser.addini("faulthandler_timeout", help, default=0.0)
 
 

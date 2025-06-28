@@ -27,11 +27,11 @@ class JsonConfigSettingsSource(InitSettingsSource, ConfigFileSourceMixin):
         json_file: PathType | None = DEFAULT_PATH,
         json_file_encoding: str | None = None,
     ):
-        self.json_file_path = json_file if json_file != DEFAULT_PATH else settings_cls.model_config.get('json_file')
+        self.json_file_path = json_file if json_file != DEFAULT_PATH else settings_cls.model_config.get("json_file")
         self.json_file_encoding = (
             json_file_encoding
             if json_file_encoding is not None
-            else settings_cls.model_config.get('json_file_encoding')
+            else settings_cls.model_config.get("json_file_encoding")
         )
         self.json_data = self._read_files(self.json_file_path)
         super().__init__(settings_cls, self.json_data)
@@ -41,7 +41,7 @@ class JsonConfigSettingsSource(InitSettingsSource, ConfigFileSourceMixin):
             return json.load(json_file)
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(json_file={self.json_file_path})'
+        return f"{self.__class__.__name__}(json_file={self.json_file_path})"
 
 
-__all__ = ['JsonConfigSettingsSource']
+__all__ = ["JsonConfigSettingsSource"]

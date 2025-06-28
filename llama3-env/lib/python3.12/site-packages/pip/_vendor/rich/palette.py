@@ -63,9 +63,7 @@ class Palette:
             green = green1 - green2
             blue = blue1 - blue2
             return _sqrt(
-                (((512 + red_mean) * red * red) >> 8)
-                + 4 * green * green
-                + (((767 - red_mean) * blue * blue) >> 8)
+                (((512 + red_mean) * red * red) >> 8) + 4 * green * green + (((767 - red_mean) * blue * blue) >> 8)
             )
 
         min_index = min(range(len(self._colors)), key=get_color_distance)
@@ -81,9 +79,7 @@ if __name__ == "__main__":  # pragma: no cover
     from pip._vendor.rich.style import Style
 
     class ColorBox:
-        def __rich_console__(
-            self, console: Console, options: ConsoleOptions
-        ) -> Iterable[Segment]:
+        def __rich_console__(self, console: Console, options: ConsoleOptions) -> Iterable[Segment]:
             height = console.size.height - 3
             for y in range(0, height):
                 for x in range(options.max_width):

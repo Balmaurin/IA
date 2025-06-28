@@ -101,9 +101,7 @@ def find_referenced_templates(ast: nodes.Template) -> t.Iterator[t.Optional[str]
         # a tuple or list (latter *should* not happen) made of consts,
         # yield the consts that are strings.  We could warn here for
         # non string values
-        elif isinstance(node, nodes.Include) and isinstance(
-            template.value, (tuple, list)
-        ):
+        elif isinstance(node, nodes.Include) and isinstance(template.value, (tuple, list)):
             for template_name in template.value:
                 if isinstance(template_name, str):
                     yield template_name

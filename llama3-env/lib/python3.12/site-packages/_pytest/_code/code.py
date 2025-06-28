@@ -202,9 +202,7 @@ class TracebackEntry:
         self._rawentry: Final = rawentry
         self._repr_style: Final = repr_style
 
-    def with_repr_style(
-        self, repr_style: Literal["short", "long"] | None
-    ) -> TracebackEntry:
+    def with_repr_style(self, repr_style: Literal["short", "long"] | None) -> TracebackEntry:
         return TracebackEntry(self._rawentry, repr_style)
 
     @property
@@ -231,6 +229,7 @@ class TracebackEntry:
         @property
         def end_colno(self) -> int | None:
             return None
+
     else:
 
         @property
@@ -281,9 +280,7 @@ class TracebackEntry:
     def getfirstlinesource(self) -> int:
         return self.frame.code.firstlineno
 
-    def getsource(
-        self, astcache: dict[str | Path, ast.AST] | None = None
-    ) -> Source | None:
+    def getsource(self, astcache: dict[str | Path, ast.AST] | None = None) -> Source | None:
         """Return failing source code."""
         # we use the passed in astcache to not reparse asttrees
         # within exception info printing
@@ -297,9 +294,7 @@ class TracebackEntry:
                 astnode = astcache.get(key, None)
         start = self.getfirstlinesource()
         try:
-            astnode, _, end = getstatementrange_ast(
-                self.lineno, source, astnode=astnode
-            )
+            astnode, _, end = getstatementrange_ast(self.lineno, source, astnode=astnode)
         except SyntaxError:
             end = self.lineno + 1
         else:
@@ -462,9 +457,7 @@ class Traceback(list[TracebackEntry]):
         return None
 
 
-def stringify_exception(
-    exc: BaseException, include_subexception_msg: bool = True
-) -> str:
+def stringify_exception(exc: BaseException, include_subexception_msg: bool = True) -> str:
     try:
         notes = getattr(exc, "__notes__", [])
     except KeyError:
@@ -540,8 +533,7 @@ class ExceptionInfo(Generic[E]):
         .. versionadded:: 7.4
         """
         assert exception.__traceback__, (
-            "Exceptions passed to ExcInfo.from_exception(...)"
-            " must have a non-None __traceback__."
+            "Exceptions passed to ExcInfo.from_exception(...)" " must have a non-None __traceback__."
         )
         exc_info = (type(exception), exception, exception.__traceback__)
         return cls.from_exc_info(exc_info, exprinfo)
@@ -596,33 +588,25 @@ class ExceptionInfo(Generic[E]):
     @property
     def type(self) -> type[E]:
         """The exception class."""
-        assert self._excinfo is not None, (
-            ".type can only be used after the context manager exits"
-        )
+        assert self._excinfo is not None, ".type can only be used after the context manager exits"
         return self._excinfo[0]
 
     @property
     def value(self) -> E:
         """The exception value."""
-        assert self._excinfo is not None, (
-            ".value can only be used after the context manager exits"
-        )
+        assert self._excinfo is not None, ".value can only be used after the context manager exits"
         return self._excinfo[1]
 
     @property
     def tb(self) -> TracebackType:
         """The exception raw traceback."""
-        assert self._excinfo is not None, (
-            ".tb can only be used after the context manager exits"
-        )
+        assert self._excinfo is not None, ".tb can only be used after the context manager exits"
         return self._excinfo[2]
 
     @property
     def typename(self) -> str:
         """The type name of the exception."""
-        assert self._excinfo is not None, (
-            ".typename can only be used after the context manager exits"
-        )
+        assert self._excinfo is not None, ".typename can only be used after the context manager exits"
         return self.type.__name__
 
     @property
@@ -794,9 +778,7 @@ class ExceptionInfo(Generic[E]):
             return False
         for exc in exc_group.exceptions:
             if isinstance(exc, BaseExceptionGroup):
-                if self._group_contains(
-                    exc, expected_exception, match, target_depth, current_depth + 1
-                ):
+                if self._group_contains(exc, expected_exception, match, target_depth, current_depth + 1):
                     return True
             if (target_depth is not None) and (current_depth != target_depth):
                 # not at the target depth, no match
@@ -859,9 +841,7 @@ if TYPE_CHECKING:
     # Type alias for the `tbfilter` setting:
     # bool: If True, it should be filtered using Traceback.filter()
     # callable: A callable that takes an ExceptionInfo and returns the filtered traceback.
-    TracebackFilter: TypeAlias = Union[
-        bool, Callable[[ExceptionInfo[BaseException]], Traceback]
-    ]
+    TracebackFilter: TypeAlias = Union[bool, Callable[[ExceptionInfo[BaseException]], Traceback]]
 
 
 @dataclasses.dataclass
@@ -880,9 +860,7 @@ class FormattedExcinfo:
     truncate_locals: bool = True
     truncate_args: bool = True
     chain: bool = True
-    astcache: dict[str | Path, ast.AST] = dataclasses.field(
-        default_factory=dict, init=False, repr=False
-    )
+    astcache: dict[str | Path, ast.AST] = dataclasses.field(default_factory=dict, init=False, repr=False)
 
     def _getindent(self, source: Source) -> int:
         # Figure out indent for the given source.
@@ -1056,11 +1034,7 @@ class FormattedExcinfo:
         excinfo: ExceptionInfo[BaseException] | None = None,
     ) -> ReprEntry:
         lines: list[str] = []
-        style = (
-            entry._repr_style
-            if entry is not None and entry._repr_style is not None
-            else self.style
-        )
+        style = entry._repr_style if entry is not None and entry._repr_style is not None else self.style
         if style in ("short", "long") and entry is not None:
             source = self._getentrysource(entry)
             if source is None:
@@ -1131,15 +1105,10 @@ class FormattedExcinfo:
             entries = [self.repr_traceback_entry(last, excinfo)]
             return ReprTraceback(entries, None, style=self.style)
 
-        entries = [
-            self.repr_traceback_entry(entry, excinfo if last == entry else None)
-            for entry in traceback
-        ]
+        entries = [self.repr_traceback_entry(entry, excinfo if last == entry else None) for entry in traceback]
         return ReprTraceback(entries, extraline, style=self.style)
 
-    def _truncate_recursive_traceback(
-        self, traceback: Traceback
-    ) -> tuple[Traceback, str | None]:
+    def _truncate_recursive_traceback(self, traceback: Traceback) -> tuple[Traceback, str | None]:
         """Truncate the given recursive traceback trying to find the starting
         point of the recursion.
 
@@ -1212,9 +1181,7 @@ class FormattedExcinfo:
                 e = e.__cause__
                 excinfo_ = ExceptionInfo.from_exception(e) if e.__traceback__ else None
                 descr = "The above exception was the direct cause of the following exception:"
-            elif (
-                e.__context__ is not None and not e.__suppress_context__ and self.chain
-            ):
+            elif e.__context__ is not None and not e.__suppress_context__ and self.chain:
                 e = e.__context__
                 excinfo_ = ExceptionInfo.from_exception(e) if e.__traceback__ else None
                 descr = "During handling of the above exception, another exception occurred:"
@@ -1247,9 +1214,7 @@ class ExceptionRepr(TerminalRepr):
     # Provided by subclasses.
     reprtraceback: ReprTraceback
     reprcrash: ReprFileLocation | None
-    sections: list[tuple[str, str, str]] = dataclasses.field(
-        init=False, default_factory=list
-    )
+    sections: list[tuple[str, str, str]] = dataclasses.field(init=False, default_factory=list)
 
     def addsection(self, name: str, content: str, sep: str = "-") -> None:
         self.sections.append((name, content, sep))
@@ -1311,9 +1276,7 @@ class ReprTraceback(TerminalRepr):
             entry.toterminal(tw)
             if i < len(self.reprentries) - 1:
                 next_entry = self.reprentries[i + 1]
-                if entry.style == "long" or (
-                    entry.style == "short" and next_entry.style == "long"
-                ):
+                if entry.style == "long" or (entry.style == "short" and next_entry.style == "long"):
                     tw.sep(self.entrysep)
 
         if self.extraline:
@@ -1417,9 +1380,7 @@ class ReprEntry(TerminalRepr):
             self.reprfileloc.toterminal(tw)
 
     def __str__(self) -> str:
-        return "{}\n{}\n{}".format(
-            "\n".join(self.lines), self.reprlocals, self.reprfileloc
-        )
+        return "{}\n{}\n{}".format("\n".join(self.lines), self.reprlocals, self.reprfileloc)
 
 
 @dataclasses.dataclass(eq=False)
@@ -1555,9 +1516,7 @@ def filter_traceback(entry: TracebackEntry) -> bool:
     return True
 
 
-def filter_excinfo_traceback(
-    tbfilter: TracebackFilter, excinfo: ExceptionInfo[BaseException]
-) -> Traceback:
+def filter_excinfo_traceback(tbfilter: TracebackFilter, excinfo: ExceptionInfo[BaseException]) -> Traceback:
     """Filter the exception traceback in ``excinfo`` according to ``tbfilter``."""
     if callable(tbfilter):
         return tbfilter(excinfo)

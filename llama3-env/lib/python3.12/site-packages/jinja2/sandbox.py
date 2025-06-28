@@ -61,9 +61,7 @@ _mutable_spec: t.Tuple[t.Tuple[t.Type[t.Any], t.FrozenSet[str]], ...] = (
     ),
     (
         abc.MutableSequence,
-        frozenset(
-            ["append", "clear", "pop", "reverse", "insert", "sort", "extend", "remove"]
-        ),
+        frozenset(["append", "clear", "pop", "reverse", "insert", "sort", "extend", "remove"]),
     ),
     (
         deque,
@@ -91,10 +89,7 @@ def safe_range(*args: int) -> range:
     rng = range(*args)
 
     if len(rng) > MAX_RANGE:
-        raise OverflowError(
-            "Range too big. The sandbox blocks ranges larger than"
-            f" MAX_RANGE ({MAX_RANGE})."
-        )
+        raise OverflowError("Range too big. The sandbox blocks ranges larger than" f" MAX_RANGE ({MAX_RANGE}).")
 
     return rng
 
@@ -141,9 +136,7 @@ def is_internal_attribute(obj: t.Any, attr: str) -> bool:
     elif hasattr(types, "CoroutineType") and isinstance(obj, types.CoroutineType):
         if attr in UNSAFE_COROUTINE_ATTRIBUTES:
             return True
-    elif hasattr(types, "AsyncGeneratorType") and isinstance(
-        obj, types.AsyncGeneratorType
-    ):
+    elif hasattr(types, "AsyncGeneratorType") and isinstance(obj, types.AsyncGeneratorType):
         if attr in UNSAFE_ASYNC_GENERATOR_ATTRIBUTES:
             return True
     return attr.startswith("__")
@@ -261,13 +254,9 @@ class SandboxedEnvironment(Environment):
         This also recognizes the Django convention of setting
         ``func.alters_data = True``.
         """
-        return not (
-            getattr(obj, "unsafe_callable", False) or getattr(obj, "alters_data", False)
-        )
+        return not (getattr(obj, "unsafe_callable", False) or getattr(obj, "alters_data", False))
 
-    def call_binop(
-        self, context: Context, operator: str, left: t.Any, right: t.Any
-    ) -> t.Any:
+    def call_binop(self, context: Context, operator: str, left: t.Any, right: t.Any) -> t.Any:
         """For intercepted binary operator calls (:meth:`intercepted_binops`)
         this function is executed instead of the builtin operator.  This can
         be used to fine tune the behavior of certain operators.
@@ -285,9 +274,7 @@ class SandboxedEnvironment(Environment):
         """
         return self.unop_table[operator](arg)
 
-    def getitem(
-        self, obj: t.Any, argument: t.Union[str, t.Any]
-    ) -> t.Union[t.Any, Undefined]:
+    def getitem(self, obj: t.Any, argument: t.Union[str, t.Any]) -> t.Union[t.Any, Undefined]:
         """Subscribe an object from sandboxed code."""
         try:
             return obj[argument]
@@ -334,8 +321,7 @@ class SandboxedEnvironment(Environment):
     def unsafe_undefined(self, obj: t.Any, attribute: str) -> Undefined:
         """Return an undefined object for unsafe attributes."""
         return self.undefined(
-            f"access to attribute {attribute!r} of"
-            f" {type(obj).__name__!r} object is unsafe.",
+            f"access to attribute {attribute!r} of" f" {type(obj).__name__!r} object is unsafe.",
             name=attribute,
             obj=obj,
             exc=SecurityError,
@@ -347,9 +333,10 @@ class SandboxedEnvironment(Environment):
         rather than in :meth:`call`, so that calls made without ``call`` are
         also sandboxed.
         """
-        if not isinstance(
-            value, (types.MethodType, types.BuiltinMethodType)
-        ) or value.__name__ not in ("format", "format_map"):
+        if not isinstance(value, (types.MethodType, types.BuiltinMethodType)) or value.__name__ not in (
+            "format",
+            "format_map",
+        ):
             return None
 
         f_self: t.Any = value.__self__
@@ -374,9 +361,7 @@ class SandboxedEnvironment(Environment):
                     raise TypeError("format_map() takes no keyword arguments")
 
                 if len(args) != 1:
-                    raise TypeError(
-                        f"format_map() takes exactly one argument ({len(args)} given)"
-                    )
+                    raise TypeError(f"format_map() takes exactly one argument ({len(args)} given)")
 
                 kwargs = args[0]
                 args = ()
@@ -419,9 +404,7 @@ class SandboxedFormatter(Formatter):
         self._env = env
         super().__init__(**kwargs)
 
-    def get_field(
-        self, field_name: str, args: t.Sequence[t.Any], kwargs: t.Mapping[str, t.Any]
-    ) -> t.Tuple[t.Any, str]:
+    def get_field(self, field_name: str, args: t.Sequence[t.Any], kwargs: t.Mapping[str, t.Any]) -> t.Tuple[t.Any, str]:
         first, rest = formatter_field_name_split(field_name)
         obj = self.get_value(first, args, kwargs)
         for is_attr, i in rest:

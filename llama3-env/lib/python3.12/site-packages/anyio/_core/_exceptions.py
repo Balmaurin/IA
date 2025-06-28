@@ -80,9 +80,7 @@ class DelimiterNotFound(Exception):
     """
 
     def __init__(self, max_bytes: int) -> None:
-        super().__init__(
-            f"The delimiter was not found among the first {max_bytes} bytes"
-        )
+        super().__init__(f"The delimiter was not found among the first {max_bytes} bytes")
 
 
 class EndOfStream(Exception):
@@ -100,9 +98,7 @@ class IncompleteRead(Exception):
     """
 
     def __init__(self) -> None:
-        super().__init__(
-            "The stream was closed before the read operation could be completed"
-        )
+        super().__init__("The stream was closed before the read operation could be completed")
 
 
 class TypedAttributeLookupError(LookupError):

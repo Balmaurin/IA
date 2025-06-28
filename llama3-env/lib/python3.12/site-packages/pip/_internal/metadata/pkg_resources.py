@@ -63,9 +63,7 @@ class InMemoryMetadata:
             return self._metadata[name].decode()
         except UnicodeDecodeError as e:
             # Augment the default error with the origin of the file.
-            raise UnsupportedWheel(
-                f"Error decoding metadata for {self._wheel_name}: {e} in {name} file"
-            )
+            raise UnsupportedWheel(f"Error decoding metadata for {self._wheel_name}: {e} in {name} file")
 
     def get_metadata_lines(self, name: str) -> Iterable[str]:
         return pkg_resources.yield_lines(self.get_metadata(name))
@@ -90,9 +88,7 @@ class Distribution(BaseDistribution):
     @property
     def _extra_mapping(self) -> Mapping[NormalizedName, str]:
         if self.__extra_mapping is None:
-            self.__extra_mapping = {
-                canonicalize_name(extra): extra for extra in self._dist.extras
-            }
+            self.__extra_mapping = {canonicalize_name(extra): extra for extra in self._dist.extras}
 
         return self.__extra_mapping
 
@@ -240,9 +236,7 @@ class Distribution(BaseDistribution):
 
     def iter_dependencies(self, extras: Collection[str] = ()) -> Iterable[Requirement]:
         if extras:
-            relevant_extras = set(self._extra_mapping) & set(
-                map(canonicalize_name, extras)
-            )
+            relevant_extras = set(self._extra_mapping) & set(map(canonicalize_name, extras))
             extras = [self._extra_mapping[extra] for extra in relevant_extras]
         return self._dist.requires(extras)
 

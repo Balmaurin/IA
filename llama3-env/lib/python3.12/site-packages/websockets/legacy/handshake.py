@@ -54,16 +54,12 @@ def check_request(headers: Headers) -> str:
             Then, the server must return a 400 Bad Request error.
 
     """
-    connection: list[ConnectionOption] = sum(
-        [parse_connection(value) for value in headers.get_all("Connection")], []
-    )
+    connection: list[ConnectionOption] = sum([parse_connection(value) for value in headers.get_all("Connection")], [])
 
     if not any(value.lower() == "upgrade" for value in connection):
         raise InvalidUpgrade("Connection", ", ".join(connection))
 
-    upgrade: list[UpgradeProtocol] = sum(
-        [parse_upgrade(value) for value in headers.get_all("Upgrade")], []
-    )
+    upgrade: list[UpgradeProtocol] = sum([parse_upgrade(value) for value in headers.get_all("Upgrade")], [])
 
     # For compatibility with non-strict implementations, ignore case when
     # checking the Upgrade header. The RFC always uses "websocket", except
@@ -130,16 +126,12 @@ def check_response(headers: Headers, key: str) -> None:
         InvalidHandshake: If the handshake response is invalid.
 
     """
-    connection: list[ConnectionOption] = sum(
-        [parse_connection(value) for value in headers.get_all("Connection")], []
-    )
+    connection: list[ConnectionOption] = sum([parse_connection(value) for value in headers.get_all("Connection")], [])
 
     if not any(value.lower() == "upgrade" for value in connection):
         raise InvalidUpgrade("Connection", " ".join(connection))
 
-    upgrade: list[UpgradeProtocol] = sum(
-        [parse_upgrade(value) for value in headers.get_all("Upgrade")], []
-    )
+    upgrade: list[UpgradeProtocol] = sum([parse_upgrade(value) for value in headers.get_all("Upgrade")], [])
 
     # For compatibility with non-strict implementations, ignore case when
     # checking the Upgrade header. The RFC always uses "websocket", except

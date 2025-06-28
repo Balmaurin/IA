@@ -1,7 +1,16 @@
+"""User management module for handling user registration, login, and authentication.
+
+This module provides functions for user management including registration, login,
+and logout functionality. It handles password hashing, user validation, and JWT
+token generation.
+"""
+
 from typing import Dict, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import select, update, delete
+
 from passlib.context import CryptContext
+from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from sheily_light_api.core.database import SessionLocal
 from sheily_light_api.models import User
@@ -12,10 +21,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ------------------ helpers ------------------
 
+
 def _get_user(db: Session, username: str) -> Optional[User]:
-    return db.execute(
-        select(User).where(User.username == username)
-    ).scalar_one_or_none()
+    return db.execute(select(User).where(User.username == username)).scalar_one_or_none()
 
 
 # ------------------ API functions ------------------
@@ -46,20 +54,19 @@ def register_user(payload: Dict[str, str]) -> Dict[str, str]:
             return {"error": "Username already exists"}
 
         # Create new user
-        user = User(
-            username=username,
-            hashed_password=pwd_context.hash(password)
-        )
-        
+        user = User(username=username, hashed_password=pwd_context.hash(password))
+
         db.add(user)
         db.commit()
         db.refresh(user)
         return {"detail": "User registered successfully"}
 
-    except Exception as e:
+    except SQLAlchemyError:
         db.rollback()
-        return {"error": f"Registration failed: {str(e)}"}
-        
+        return {"error": "Registration failed due to a database error"}
+    except (ValueError, TypeError) as e:
+        db.rollback()
+        return {"error": f"Invalid input: {str(e)}"}
     finally:
         db.close()
 
@@ -75,10 +82,10 @@ def login_user(payload: Dict[str, str]) -> Dict[str, str]:
     """
     username = payload.get("username")
     password = payload.get("password")
-    
+
     if not username or not password:
         return {"error": "Username and password are required"}
-    
+
     db = SessionLocal()
     try:
         # Get user from database
@@ -88,20 +95,15 @@ def login_user(payload: Dict[str, str]) -> Dict[str, str]:
         if not user or not pwd_context.verify(password, user.hashed_password):
             # Use generic message to avoid user enumeration
             return {"error": "Invalid username or password"}
-        
+
         # Generate JWT token
         token = create_access_token(subject=username)
-        return {
-            "access_token": token,
-            "token_type": "bearer",
-            "user_id": str(user.id)
-        }
+        return {"access_token": token, "token_type": "bearer", "user_id": str(user.id)}
 
-    except Exception as e:
-        # Log the actual error for debugging
-        print(f"Login error: {str(e)}")
-        return {"error": "Authentication failed. Please try again later."}
-
+    except SQLAlchemyError:
+        return {"error": "Authentication failed due to a database error"}
+    except (ValueError, TypeError) as e:
+        return {"error": f"Invalid input: {str(e)}"}
     finally:
         db.close()
 

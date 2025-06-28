@@ -70,9 +70,7 @@ def _iter_built(infos: Iterator[IndexCandidateInfo]) -> Iterator[Candidate]:
             versions_found.add(version)
 
 
-def _iter_built_with_prepended(
-    installed: Candidate, infos: Iterator[IndexCandidateInfo]
-) -> Iterator[Candidate]:
+def _iter_built_with_prepended(installed: Candidate, infos: Iterator[IndexCandidateInfo]) -> Iterator[Candidate]:
     """Iterator for ``FoundCandidates``.
 
     This iterator is used when the resolver prefers the already-installed
@@ -92,9 +90,7 @@ def _iter_built_with_prepended(
         versions_found.add(version)
 
 
-def _iter_built_with_inserted(
-    installed: Candidate, infos: Iterator[IndexCandidateInfo]
-) -> Iterator[Candidate]:
+def _iter_built_with_inserted(installed: Candidate, infos: Iterator[IndexCandidateInfo]) -> Iterator[Candidate]:
     """Iterator for ``FoundCandidates``.
 
     This iterator is used when the resolver prefers to upgrade an

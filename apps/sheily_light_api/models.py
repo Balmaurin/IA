@@ -1,9 +1,11 @@
 """SQLAlchemy models shared across SHEILY-light backend MVP."""
+
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
 
 from .core.database import Base
+
 
 class User(Base):
     __tablename__ = "users"

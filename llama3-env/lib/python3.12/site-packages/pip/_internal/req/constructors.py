@@ -72,9 +72,7 @@ def _set_requirement_extras(req: Requirement, new_extras: Set[str]) -> Requireme
         flags=re.ASCII,
     )
     # ireq.req is a valid requirement so the regex should always match
-    assert (
-        match is not None
-    ), f"regex match on requirement {req} failed, this should never happen"
+    assert match is not None, f"regex match on requirement {req} failed, this should never happen"
     pre: Optional[str] = match.group(1)
     post: Optional[str] = match.group(3)
     assert (
@@ -133,8 +131,7 @@ def parse_editable(editable_req: str) -> Tuple[Optional[str], str, Set[str]]:
     package_name = link.egg_fragment
     if not package_name:
         raise InstallationError(
-            f"Could not detect requirement name for '{editable_req}', "
-            "please specify one with #egg=your_package_name"
+            f"Could not detect requirement name for '{editable_req}', " "please specify one with #egg=your_package_name"
         )
     return package_name, url, set()
 
@@ -285,8 +282,7 @@ def _get_url_from_path(path: str, name: str) -> Optional[str]:
         # TODO: The is_installable_dir test here might not be necessary
         #       now that it is done in load_pyproject_toml too.
         raise InstallationError(
-            f"Directory {name!r} is not installable. Neither 'setup.py' "
-            "nor 'pyproject.toml' found."
+            f"Directory {name!r} is not installable. Neither 'setup.py' " "nor 'pyproject.toml' found."
         )
     if not is_archive_file(path):
         return None
@@ -364,9 +360,7 @@ def parse_req_from_line(name: str, line_source: Optional[str]) -> RequirementPar
             if os.path.sep in req_as_string:
                 add_msg = "It looks like a path."
                 add_msg += deduce_helpful_msg(req_as_string)
-            elif "=" in req_as_string and not any(
-                op in req_as_string for op in operators
-            ):
+            elif "=" in req_as_string and not any(op in req_as_string for op in operators):
                 add_msg = "= is not a valid operator. Did you mean == ?"
             else:
                 add_msg = ""
@@ -436,12 +430,7 @@ def install_req_from_req_string(
         PyPI.file_storage_domain,
         TestPyPI.file_storage_domain,
     ]
-    if (
-        req.url
-        and comes_from
-        and comes_from.link
-        and comes_from.link.netloc in domains_not_allowed
-    ):
+    if req.url and comes_from and comes_from.link and comes_from.link.netloc in domains_not_allowed:
         # Explicitly disallow pypi packages that depend on external urls
         raise InstallationError(
             "Packages installed from PyPI cannot depend on packages "
@@ -482,14 +471,8 @@ def install_req_from_parsed_requirement(
             comes_from=parsed_req.comes_from,
             use_pep517=use_pep517,
             isolated=isolated,
-            global_options=(
-                parsed_req.options.get("global_options", [])
-                if parsed_req.options
-                else []
-            ),
-            hash_options=(
-                parsed_req.options.get("hashes", {}) if parsed_req.options else {}
-            ),
+            global_options=(parsed_req.options.get("global_options", []) if parsed_req.options else []),
+            hash_options=(parsed_req.options.get("hashes", {}) if parsed_req.options else {}),
             constraint=parsed_req.constraint,
             line_source=parsed_req.line_source,
             user_supplied=user_supplied,
@@ -498,9 +481,7 @@ def install_req_from_parsed_requirement(
     return req
 
 
-def install_req_from_link_and_ireq(
-    link: Link, ireq: InstallRequirement
-) -> InstallRequirement:
+def install_req_from_link_and_ireq(link: Link, ireq: InstallRequirement) -> InstallRequirement:
     return InstallRequirement(
         req=ireq.req,
         comes_from=ireq.comes_from,
@@ -523,9 +504,7 @@ def install_req_drop_extras(ireq: InstallRequirement) -> InstallRequirement:
     (comes_from).
     """
     return InstallRequirement(
-        req=(
-            _set_requirement_extras(ireq.req, set()) if ireq.req is not None else None
-        ),
+        req=(_set_requirement_extras(ireq.req, set()) if ireq.req is not None else None),
         comes_from=ireq,
         editable=ireq.editable,
         link=ireq.link,
@@ -552,9 +531,5 @@ def install_req_extend_extras(
     """
     result = copy.copy(ireq)
     result.extras = {*ireq.extras, *extras}
-    result.req = (
-        _set_requirement_extras(ireq.req, result.extras)
-        if ireq.req is not None
-        else None
-    )
+    result.req = _set_requirement_extras(ireq.req, result.extras) if ireq.req is not None else None
     return result

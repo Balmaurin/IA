@@ -1,0 +1,148 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+
+    - name: Run tests
+      env:
+        DATABASE_URL: postgresql://test:test@localhost:5432/test
+      run: |
+        pytest --cov=app --cov-report=xml
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install linters
+      run: |
+        pip install black flake8 isort mypy
+    - name: Run Black
+      run: black --check .
+    - name: Run Flake8
+      run: flake8 .
+    - name: Run iSort
+      run: isort --check-only .
+    - name: Run MyPy
+      run: mypy .
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run Bandit
+      uses: PyCQA/bandit@main
+      with:
+        args: -r . -x tests/
+    - name: Run Safety
+      run: |
+        pip install safety
+        safety check --full-report
+
+  deploy:
+    needs: [test, lint, security-scan]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install SSH key
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Add known hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to production
+      run: |
+        # Variables de entorno para el despliegue
+        ENV="production"
+        REMOTE_DIR="/var/www/sheily"
+        
+        # Configurar Git
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+        # Sincronizar con el servidor
+        rsync -avz --delete \
+          --exclude '.git' \
+          --exclude '.github' \
+          --exclude '.env*' \
+          --exclude '*.pem' \
+          --exclude '*.key' \
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:$REMOTE_DIR/
+        
+        # Ejecutar comandos en el servidor
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          cd $REMOTE_DIR && \
+          docker-compose -f docker-compose.prod.yml pull && \
+          docker-compose -f docker-compose.prod.yml up -d --build && \
+          docker system prune -f"
+
+    - name: Verify deployment
+      run: |
+        curl -sSf https://${{ secrets.PRODUCTION_URL }}/health
+        
+    - name: Notify Slack
+      if: always()
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR: ${{ job.status == 'success' && '#36a64f' || '#ff0000' }}
+        SLACK_TITLE: 'Despliegue ${{ job.status }} - ${{ github.repository }}'
+        SLACK_MESSAGE: 'Commit: ${{ github.sha }}\nMensaje: ${{ github.event.head_commit.message }}'
+        SLACK_USERNAME: GitHub Actions
+        MSG_MINIMAL: true

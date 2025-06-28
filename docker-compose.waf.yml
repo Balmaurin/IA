@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  nginx-waf:
+    image: owasp/modsecurity-crs:nginx
+    container_name: nginx-waf
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/modsecurity:/etc/nginx/modsecurity
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/logs:/var/log/nginx
+      - /etc/letsencrypt:/etc/letsencrypt
+    environment:
+      - BACKEND_HOST=api
+      - BACKEND_PORT=8000
+      - SSL_CERT=/etc/letsencrypt/live/sheily.example.com/fullchain.pem
+      - SSL_CERT_KEY=/etc/letsencrypt/live/sheily.example.com/privkey.pem
+    networks:
+      - traefik-public
+    deploy:
+      mode: global
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  traefik-public:
+    external: true

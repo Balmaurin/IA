@@ -38,9 +38,7 @@ class FormatControl:
     @staticmethod
     def handle_mutual_excludes(value: str, target: Set[str], other: Set[str]) -> None:
         if value.startswith("-"):
-            raise CommandError(
-                "--no-binary / --only-binary option requires 1 argument."
-            )
+            raise CommandError("--no-binary / --only-binary option requires 1 argument.")
         new = value.split(",")
         while ":all:" in new:
             other.clear()

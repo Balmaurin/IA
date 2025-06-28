@@ -47,10 +47,10 @@ class EnvSettingsSource(PydanticBaseEnvSettingsSource):
             settings_cls, case_sensitive, env_prefix, env_ignore_empty, env_parse_none_str, env_parse_enums
         )
         self.env_nested_delimiter = (
-            env_nested_delimiter if env_nested_delimiter is not None else self.config.get('env_nested_delimiter')
+            env_nested_delimiter if env_nested_delimiter is not None else self.config.get("env_nested_delimiter")
         )
         self.env_nested_max_split = (
-            env_nested_max_split if env_nested_max_split is not None else self.config.get('env_nested_max_split')
+            env_nested_max_split if env_nested_max_split is not None else self.config.get("env_nested_max_split")
         )
         self.maxsplit = (self.env_nested_max_split or 0) - 1
         self.env_prefix_len = len(self.env_prefix)
@@ -217,7 +217,7 @@ class EnvSettingsSource(PydanticBaseEnvSettingsSource):
         is_dict = ann is dict or _lenient_issubclass(get_origin(ann), dict)
 
         prefixes = [
-            f'{env_name}{self.env_nested_delimiter}' for _, env_name, _ in self._extract_field_info(field, field_name)
+            f"{env_name}{self.env_nested_delimiter}" for _, env_name, _ in self._extract_field_info(field, field_name)
         ]
         result: dict[str, Any] = {}
         for env_name, env_val in env_vars.items():
@@ -262,9 +262,9 @@ class EnvSettingsSource(PydanticBaseEnvSettingsSource):
 
     def __repr__(self) -> str:
         return (
-            f'{self.__class__.__name__}(env_nested_delimiter={self.env_nested_delimiter!r}, '
-            f'env_prefix_len={self.env_prefix_len!r})'
+            f"{self.__class__.__name__}(env_nested_delimiter={self.env_nested_delimiter!r}, "
+            f"env_prefix_len={self.env_prefix_len!r})"
         )
 
 
-__all__ = ['EnvSettingsSource']
+__all__ = ["EnvSettingsSource"]

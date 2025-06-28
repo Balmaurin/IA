@@ -71,9 +71,7 @@ class TargetPython:
         """
         display_version = None
         if self._given_py_version_info is not None:
-            display_version = ".".join(
-                str(part) for part in self._given_py_version_info
-            )
+            display_version = ".".join(str(part) for part in self._given_py_version_info)
 
         key_values = [
             ("platforms", self.platforms),
@@ -81,9 +79,7 @@ class TargetPython:
             ("abis", self.abis),
             ("implementation", self.implementation),
         ]
-        return " ".join(
-            f"{key}={value!r}" for key, value in key_values if value is not None
-        )
+        return " ".join(f"{key}={value!r}" for key, value in key_values if value is not None)
 
     def get_sorted_tags(self) -> List[Tag]:
         """

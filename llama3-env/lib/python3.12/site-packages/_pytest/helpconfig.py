@@ -102,8 +102,7 @@ def pytest_addoption(parser: Parser) -> None:
         "--override-ini",
         dest="override_ini",
         action="append",
-        help='Override ini option with "option=value" style, '
-        "e.g. `-o xfail_strict=True -o cache_dir=cache`.",
+        help='Override ini option with "option=value" style, ' "e.g. `-o xfail_strict=True -o cache_dir=cache`.",
     )
 
 
@@ -142,9 +141,7 @@ def pytest_cmdline_parse() -> Generator[None, Config, Config]:
 
 def showversion(config: Config) -> None:
     if config.option.version > 1:
-        sys.stdout.write(
-            f"This is pytest version {pytest.__version__}, imported from {pytest.__file__}\n"
-        )
+        sys.stdout.write(f"This is pytest version {pytest.__version__}, imported from {pytest.__file__}\n")
         plugininfo = getpluginversioninfo(config)
         if plugininfo:
             for line in plugininfo:
@@ -168,17 +165,12 @@ def pytest_cmdline_main(config: Config) -> int | ExitCode | None:
 def showhelp(config: Config) -> None:
     import textwrap
 
-    reporter: TerminalReporter | None = config.pluginmanager.get_plugin(
-        "terminalreporter"
-    )
+    reporter: TerminalReporter | None = config.pluginmanager.get_plugin("terminalreporter")
     assert reporter is not None
     tw = reporter._tw
     tw.write(config._parser.optparser.format_help())
     tw.line()
-    tw.line(
-        "[pytest] ini-options in the first "
-        "pytest.ini|tox.ini|setup.cfg|pyproject.toml file found:"
-    )
+    tw.line("[pytest] ini-options in the first " "pytest.ini|tox.ini|setup.cfg|pyproject.toml file found:")
     tw.line()
 
     columns = tw.fullwidth  # costly call

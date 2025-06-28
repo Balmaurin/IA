@@ -57,9 +57,7 @@ def is_url(name: str) -> bool:
     return scheme in ["http", "https", "file", "ftp"] + vcs.all_schemes
 
 
-def make_vcs_requirement_url(
-    repo_url: str, rev: str, project_name: str, subdir: Optional[str] = None
-) -> str:
+def make_vcs_requirement_url(repo_url: str, rev: str, project_name: str, subdir: Optional[str] = None) -> str:
     """
     Return the URL for a VCS requirement.
 
@@ -75,9 +73,7 @@ def make_vcs_requirement_url(
     return req
 
 
-def find_path_to_project_root_from_repo_root(
-    location: str, repo_root: str
-) -> Optional[str]:
+def find_path_to_project_root_from_repo_root(location: str, repo_root: str) -> Optional[str]:
     """
     Find the the Python project's root by searching up the filesystem from
     `location`. Return the path to project root relative to `repo_root`.
@@ -92,8 +88,7 @@ def find_path_to_project_root_from_repo_root(
             # We've traversed up to the root of the filesystem without
             # finding a Python project.
             logger.warning(
-                "Could not find a Python project for directory %s (tried all "
-                "parent directories)",
+                "Could not find a Python project for directory %s (tried all " "parent directories)",
                 orig_location,
             )
             return None
@@ -333,9 +328,7 @@ class VersionControl:
         return False
 
     @classmethod
-    def make_rev_options(
-        cls, rev: Optional[str] = None, extra_args: Optional[CommandArgs] = None
-    ) -> RevOptions:
+    def make_rev_options(cls, rev: Optional[str] = None, extra_args: Optional[CommandArgs] = None) -> RevOptions:
         """
         Return a RevOptions object.
 
@@ -355,9 +348,7 @@ class VersionControl:
         return repo.startswith(os.path.sep) or bool(drive)
 
     @classmethod
-    def get_netloc_and_auth(
-        cls, netloc: str, scheme: str
-    ) -> Tuple[str, Tuple[Optional[str], Optional[str]]]:
+    def get_netloc_and_auth(cls, netloc: str, scheme: str) -> Tuple[str, Tuple[Optional[str], Optional[str]]]:
         """
         Parse the repository URL's netloc, and return the new netloc to use
         along with auth information.
@@ -406,9 +397,7 @@ class VersionControl:
         return url, rev, user_pass
 
     @staticmethod
-    def make_rev_args(
-        username: Optional[str], password: Optional[HiddenText]
-    ) -> CommandArgs:
+    def make_rev_args(username: Optional[str], password: Optional[HiddenText]) -> CommandArgs:
         """
         Return the RevOptions "extra arguments" to use in obtain().
         """
@@ -444,9 +433,7 @@ class VersionControl:
         """
         return cls.normalize_url(url1) == cls.normalize_url(url2)
 
-    def fetch_new(
-        self, dest: str, url: HiddenText, rev_options: RevOptions, verbosity: int
-    ) -> None:
+    def fetch_new(self, dest: str, url: HiddenText, rev_options: RevOptions, verbosity: int) -> None:
         """
         Fetch a revision from a repository, in the case that this is the
         first fetch from the repository.
@@ -647,8 +634,7 @@ class VersionControl:
             # errno.ENOENT = no such file or directory
             # In other words, the VCS executable isn't available
             raise BadCommand(
-                f"Cannot find command {cls.name!r} - do you have "
-                f"{cls.name!r} installed and in your PATH?"
+                f"Cannot find command {cls.name!r} - do you have " f"{cls.name!r} installed and in your PATH?"
             )
         except PermissionError:
             # errno.EACCES = Permission denied

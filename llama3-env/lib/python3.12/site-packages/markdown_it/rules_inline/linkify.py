@@ -1,4 +1,5 @@
 """Process links like https://example.org/"""
+
 import re
 
 from .state_inline import StateInline
@@ -19,12 +20,7 @@ def linkify(state: StateInline, silent: bool) -> bool:
     pos = state.pos
     maximum = state.posMax
 
-    if (
-        (pos + 3) > maximum
-        or state.src[pos] != ":"
-        or state.src[pos + 1] != "/"
-        or state.src[pos + 2] != "/"
-    ):
+    if (pos + 3) > maximum or state.src[pos] != ":" or state.src[pos + 1] != "/" or state.src[pos + 2] != "/":
         return False
 
     if not (match := SCHEME_RE.match(state.pending)):

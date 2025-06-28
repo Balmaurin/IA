@@ -119,9 +119,7 @@ def parse_token(header: str, pos: int, header_name: str) -> tuple[str, int]:
     return match.group(), match.end()
 
 
-_quoted_string_re = re.compile(
-    r'"(?:[\x09\x20-\x21\x23-\x5b\x5d-\x7e]|\\[\x09\x20-\x7e\x80-\xff])*"'
-)
+_quoted_string_re = re.compile(r'"(?:[\x09\x20-\x21\x23-\x5b\x5d-\x7e]|\\[\x09\x20-\x7e\x80-\xff])*"')
 
 
 _unquote_re = re.compile(r"\\([\x09\x20-\x7e\x80-\xff])")
@@ -228,9 +226,7 @@ def parse_list(
     return items
 
 
-def parse_connection_option(
-    header: str, pos: int, header_name: str
-) -> tuple[ConnectionOption, int]:
+def parse_connection_option(header: str, pos: int, header_name: str) -> tuple[ConnectionOption, int]:
     """
     Parse a Connection option from ``header`` at the given position.
 
@@ -260,14 +256,10 @@ def parse_connection(header: str) -> list[ConnectionOption]:
     return parse_list(parse_connection_option, header, 0, "Connection")
 
 
-_protocol_re = re.compile(
-    r"[-!#$%&\'*+.^_`|~0-9a-zA-Z]+(?:/[-!#$%&\'*+.^_`|~0-9a-zA-Z]+)?"
-)
+_protocol_re = re.compile(r"[-!#$%&\'*+.^_`|~0-9a-zA-Z]+(?:/[-!#$%&\'*+.^_`|~0-9a-zA-Z]+)?")
 
 
-def parse_upgrade_protocol(
-    header: str, pos: int, header_name: str
-) -> tuple[UpgradeProtocol, int]:
+def parse_upgrade_protocol(header: str, pos: int, header_name: str) -> tuple[UpgradeProtocol, int]:
     """
     Parse an Upgrade protocol from ``header`` at the given position.
 
@@ -299,9 +291,7 @@ def parse_upgrade(header: str) -> list[UpgradeProtocol]:
     return parse_list(parse_upgrade_protocol, header, 0, "Upgrade")
 
 
-def parse_extension_item_param(
-    header: str, pos: int, header_name: str
-) -> tuple[ExtensionParameter, int]:
+def parse_extension_item_param(header: str, pos: int, header_name: str) -> tuple[ExtensionParameter, int]:
     """
     Parse a single extension parameter from ``header`` at the given position.
 
@@ -325,9 +315,7 @@ def parse_extension_item_param(
             # the value after quoted-string unescaping MUST conform to
             # the 'token' ABNF.
             if _token_re.fullmatch(value) is None:
-                raise InvalidHeaderFormat(
-                    header_name, "invalid quoted header content", header, pos_before
-                )
+                raise InvalidHeaderFormat(header_name, "invalid quoted header content", header, pos_before)
         else:
             value, pos = parse_token(header, pos, header_name)
         pos = parse_OWS(header, pos)
@@ -335,9 +323,7 @@ def parse_extension_item_param(
     return (name, value), pos
 
 
-def parse_extension_item(
-    header: str, pos: int, header_name: str
-) -> tuple[ExtensionHeader, int]:
+def parse_extension_item(header: str, pos: int, header_name: str) -> tuple[ExtensionHeader, int]:
     """
     Parse an extension definition from ``header`` at the given position.
 
@@ -389,9 +375,7 @@ def parse_extension(header: str) -> list[ExtensionHeader]:
 parse_extension_list = parse_extension  # alias for backwards compatibility
 
 
-def build_extension_item(
-    name: ExtensionName, parameters: Sequence[ExtensionParameter]
-) -> str:
+def build_extension_item(name: ExtensionName, parameters: Sequence[ExtensionParameter]) -> str:
     """
     Build an extension definition.
 
@@ -415,17 +399,13 @@ def build_extension(extensions: Sequence[ExtensionHeader]) -> str:
     This is the reverse of :func:`parse_extension`.
 
     """
-    return ", ".join(
-        build_extension_item(name, parameters) for name, parameters in extensions
-    )
+    return ", ".join(build_extension_item(name, parameters) for name, parameters in extensions)
 
 
 build_extension_list = build_extension  # alias for backwards compatibility
 
 
-def parse_subprotocol_item(
-    header: str, pos: int, header_name: str
-) -> tuple[Subprotocol, int]:
+def parse_subprotocol_item(header: str, pos: int, header_name: str) -> tuple[Subprotocol, int]:
     """
     Parse a subprotocol from ``header`` at the given position.
 
@@ -547,9 +527,7 @@ def parse_authorization_basic(header: str) -> tuple[str, str]:
             f"unsupported scheme: {scheme}",
         )
     if peek_ahead(header, pos) != " ":
-        raise InvalidHeaderFormat(
-            "Authorization", "expected space after scheme", header, pos
-        )
+        raise InvalidHeaderFormat("Authorization", "expected space after scheme", header, pos)
     pos += 1
     basic_credentials, pos = parse_token68(header, pos, "Authorization")
     parse_end(header, pos, "Authorization")

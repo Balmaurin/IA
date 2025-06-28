@@ -2,6 +2,7 @@ import json
 import base64
 from typing import Dict
 
+
 def export_backup(payload: Dict):
     # Simulación: exporta usuario y hash como backup cifrado (solo ejemplo)
     username = payload["username"]
@@ -11,6 +12,7 @@ def export_backup(payload: Dict):
     backup = {"username": username, "hash": USERS_DB[username]}
     encoded = base64.b64encode(json.dumps(backup).encode()).decode()
     return {"backup": encoded}
+
 
 def import_backup(payload: Dict):
     # Simulación: importa backup

@@ -5,6 +5,7 @@ from ...core.config import settings
 
 ALGORITHM = "HS256"
 
+
 def create_access_token(subject: str, expires_delta: int | None = None) -> str:
     """Generate a JWT for a given subject (username)."""
     if expires_delta is None:

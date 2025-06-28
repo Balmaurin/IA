@@ -185,8 +185,7 @@ class InstallRequirement:
         if self.config_settings:
             if self.use_pep517 is False:
                 logger.warning(
-                    "--no-use-pep517 ignored for %s "
-                    "because --config-settings are specified.",
+                    "--no-use-pep517 ignored for %s " "because --config-settings are specified.",
                     self,
                 )
             self.use_pep517 = True
@@ -222,10 +221,7 @@ class InstallRequirement:
         return s
 
     def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__} object: "
-            f"{str(self)} editable={self.editable!r}>"
-        )
+        return f"<{self.__class__.__name__} object: " f"{str(self)} editable={self.editable!r}>"
 
     def format_debug(self) -> str:
         """An un-tested helper for getting state, for debugging."""
@@ -251,9 +247,7 @@ class InstallRequirement:
             return False
         assert self.pep517_backend
         with self.build_env:
-            runner = runner_with_spinner_message(
-                "Checking if build backend supports build_editable"
-            )
+            runner = runner_with_spinner_message("Checking if build backend supports build_editable")
             with self.pep517_backend.subprocess_runner(runner):
                 return "build_editable" in self.pep517_backend._supported_features()
 
@@ -283,9 +277,7 @@ class InstallRequirement:
             # without matching any extra
             extras_requested = ("",)
         if self.markers is not None:
-            return any(
-                self.markers.evaluate({"extra": extra}) for extra in extras_requested
-            )
+            return any(self.markers.evaluate({"extra": extra}) for extra in extras_requested)
         else:
             return True
 
@@ -341,9 +333,7 @@ class InstallRequirement:
                 s += "->" + comes_from
         return s
 
-    def ensure_build_location(
-        self, build_dir: str, autodelete: bool, parallel_builds: bool
-    ) -> str:
+    def ensure_build_location(self, build_dir: str, autodelete: bool, parallel_builds: bool) -> str:
         assert build_dir is not None
         if self._temp_build_dir is not None:
             assert self._temp_build_dir.path
@@ -352,9 +342,7 @@ class InstallRequirement:
             # Some systems have /tmp as a symlink which confuses custom
             # builds (such as numpy). Thus, we ensure that the real path
             # is returned.
-            self._temp_build_dir = TempDirectory(
-                kind=tempdir_kinds.REQ_BUILD, globally_managed=True
-            )
+            self._temp_build_dir = TempDirectory(kind=tempdir_kinds.REQ_BUILD, globally_managed=True)
 
             return self._temp_build_dir.path
 
@@ -478,9 +466,7 @@ class InstallRequirement:
     @property
     def unpacked_source_directory(self) -> str:
         assert self.source_dir, f"No source dir for {self}"
-        return os.path.join(
-            self.source_dir, self.link and self.link.subdirectory_fragment or ""
-        )
+        return os.path.join(self.source_dir, self.link and self.link.subdirectory_fragment or "")
 
     @property
     def setup_py_path(self) -> str:
@@ -561,11 +547,7 @@ class InstallRequirement:
 
         if self.use_pep517:
             assert self.pep517_backend is not None
-            if (
-                self.editable
-                and self.permit_editable_wheels
-                and self.supports_pyproject_editable
-            ):
+            if self.editable and self.permit_editable_wheels and self.supports_pyproject_editable:
                 self.metadata_directory = generate_editable_metadata(
                     build_env=self.build_env,
                     backend=self.pep517_backend,
@@ -611,8 +593,7 @@ class InstallRequirement:
                 canonicalize_name(self.req.name),
             )
         raise AssertionError(
-            f"InstallRequirement {self} has no metadata directory and no wheel: "
-            f"can't make a distribution."
+            f"InstallRequirement {self} has no metadata directory and no wheel: " f"can't make a distribution."
         )
 
     def assert_source_matches_version(self) -> None:
@@ -697,9 +678,7 @@ class InstallRequirement:
         vcs_backend.obtain(self.source_dir, url=hidden_url, verbosity=0)
 
     # Top-level Actions
-    def uninstall(
-        self, auto_confirm: bool = False, verbose: bool = False
-    ) -> Optional[UninstallPathSet]:
+    def uninstall(self, auto_confirm: bool = False, verbose: bool = False) -> Optional[UninstallPathSet]:
         """
         Uninstall the distribution currently satisfying this requirement.
 
@@ -725,9 +704,7 @@ class InstallRequirement:
 
     def _get_archive_name(self, path: str, parentdir: str, rootdir: str) -> str:
         def _clean_zip_name(name: str, prefix: str) -> str:
-            assert name.startswith(
-                prefix + os.path.sep
-            ), f"name {name!r} doesn't start with prefix {prefix!r}"
+            assert name.startswith(prefix + os.path.sep), f"name {name!r} doesn't start with prefix {prefix!r}"
             name = name[len(prefix) + 1 :]
             name = name.replace(os.path.sep, "/")
             return name
@@ -752,8 +729,7 @@ class InstallRequirement:
 
         if os.path.exists(archive_path):
             response = ask_path_exists(
-                f"The file {display_path(archive_path)} exists. (i)gnore, (w)ipe, "
-                "(b)ackup, (a)bort ",
+                f"The file {display_path(archive_path)} exists. (i)gnore, (w)ipe, " "(b)ackup, (a)bort ",
                 ("i", "w", "b", "a"),
             )
             if response == "i":
@@ -826,10 +802,7 @@ class InstallRequirement:
 
         if self.editable and not self.is_wheel:
             deprecated(
-                reason=(
-                    f"Legacy editable install of {self} (setup.py develop) "
-                    "is deprecated."
-                ),
+                reason=(f"Legacy editable install of {self} (setup.py develop) " "is deprecated."),
                 replacement=(
                     "to add a pyproject.toml or enable --use-pep517, "
                     "and use setuptools >= 64. "
@@ -927,8 +900,5 @@ def check_legacy_setup_py_options(
             replacement="to use --config-settings",
             gone_in="25.0",
         )
-        logger.warning(
-            "Implying --no-binary=:all: due to the presence of "
-            "--build-option / --global-option. "
-        )
+        logger.warning("Implying --no-binary=:all: due to the presence of " "--build-option / --global-option. ")
         options.format_control.disallow_binaries()

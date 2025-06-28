@@ -1,34 +1,155 @@
 
 version: '3.9'
+
+# Configuración de red para Traefik
+x-common-variables: &common-variables
+  TRAEFIK_PUBLIC_NETWORK: traefik-public
+  TRAEFIK_TAG: sheily
+  # Configuración de Let's Encrypt
+  EMAIL: admin@example.com
+  STAGING: "false"
+  # Configuración de dominio
+  DOMAIN: sheily.example.com
+  URL_PREFIX: api
+  VIRTUAL_HOST: "${DOMAIN}"
+  VIRTUAL_PORT: "8000"
+  LETSENCRYPT_HOST: "${DOMAIN}"
+  LETSENCRYPT_EMAIL: "${EMAIL}"
+  LETSENCRYPT_TEST: "${STAGING}"
+  TRAEFIK_HOST: "traefik.${DOMAIN}"
+
+# Definición de redes personalizadas
+networks:
+  sheily_network:
+    driver: bridge
+  traefik-public:
+    external: true
+    name: traefik-public
+
+# Definición de volúmenes persistentes
+volumes:
+  postgres_data:
+    name: sheily_postgres_data
+    driver: local
+  ollama_data:
+    name: sheily_ollama_data
+    driver: local
+  web_data:
+    name: sheily_web_data
+
 services:
   api:
-    build: ./apps/sheily_light_api
-    command: uvicorn sheily_main_api:app --host 0.0.0.0 --port 8000
-    env_file: .env
-    ports:
-      - "8000:8000"
+    build: 
+      context: ./apps/sheily_light_api
+      dockerfile: Dockerfile
+    env_file: .env.production
+    environment:
+      - TRAEFIK_PUBLIC_NETWORK=${TRAEFIK_PUBLIC_NETWORK}
+      - TRAEFIK_TAG=${TRAEFIK_TAG}
+      - EMAIL=${EMAIL}
+      - STAGING=${STAGING}
+      - DOMAIN=${DOMAIN}
+      - URL_PREFIX=${URL_PREFIX}
+      - VIRTUAL_HOST=${DOMAIN}
+      - VIRTUAL_PORT=8000
+      - VIRTUAL_PATH=/${URL_PREFIX}
+      - VIRTUAL_DEST=/
+      - LETSENCRYPT_HOST=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${EMAIL}
+      - LETSENCRYPT_TEST=${STAGING}
+      - TRAEFIK_HOST=traefik.${DOMAIN}
+    networks:
+      - sheily_network
+      - traefik-public
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.constraint-label=traefik-public"
+      - "traefik.http.routers.sheily-api-http.rule=Host(`${DOMAIN}`) && PathPrefix(`/${URL_PREFIX}`)"
+      - "traefik.http.routers.sheily-api-http.tls=true"
+      - "traefik.http.routers.sheily-api-http.tls.certresolver=letsencrypt"
+
   web:
-    build: ./web
-    env_file: .env
-    ports:
-      - "3000:80"
+    build: 
+      context: ./web
+      dockerfile: Dockerfile
+    env_file: .env.production
+    environment:
+      - TRAEFIK_PUBLIC_NETWORK=${TRAEFIK_PUBLIC_NETWORK}
+      - TRAEFIK_TAG=${TRAEFIK_TAG}
+      - EMAIL=${EMAIL}
+      - STAGING=${STAGING}
+      - DOMAIN=${DOMAIN}
+      - VIRTUAL_HOST=app.${DOMAIN}
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${EMAIL}
+      - LETSENCRYPT_TEST=${STAGING}
+      - TRAEFIK_HOST=traefik.${DOMAIN}
+    networks:
+      - sheily_network
+      - traefik-public
     depends_on:
       - api
+    volumes:
+      - web_data:/app/build
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.constraint-label=traefik-public"
+      - "traefik.http.routers.sheily-web-http.rule=Host(`app.${DOMAIN}`)"
+      - "traefik.http.routers.sheily-web-http.tls=true"
+      - "traefik.http.routers.sheily-web-http.tls.certresolver=letsencrypt"
+
   db:
-    image: postgres:15
+    image: postgres:13-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: sheily
+      POSTGRES_USER: ${POSTGRES_USER:-sheily}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-sheily}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - sheily_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sheily} -d ${POSTGRES_DB:-sheily}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   ollama:
     image: ollama/ollama:latest
     volumes:
       - ollama_data:/root/.ollama
     ports:
       - "11434:11434"
-volumes:
-  pgdata:
-  ollama_data:
+    networks:
+      - sheily_network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+

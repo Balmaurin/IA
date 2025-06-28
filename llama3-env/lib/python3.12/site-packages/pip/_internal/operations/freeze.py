@@ -104,10 +104,7 @@ def freeze(
                             req_file_path,
                             line.strip(),
                         )
-                        logger.info(
-                            "  (add #egg=PackageName to the URL to avoid"
-                            " this warning)"
-                        )
+                        logger.info("  (add #egg=PackageName to the URL to avoid" " this warning)")
                     else:
                         line_req_canonical_name = canonicalize_name(line_req.name)
                         if line_req_canonical_name not in installations:
@@ -115,8 +112,7 @@ def freeze(
                             # but has been processed already
                             if not req_files[line_req.name]:
                                 logger.warning(
-                                    "Requirement file [%s] contains %s, but "
-                                    "package %r is not installed",
+                                    "Requirement file [%s] contains %s, but " "package %r is not installed",
                                     req_file_path,
                                     COMMENT_RE.sub("", line).strip(),
                                     line_req.name,
@@ -194,15 +190,13 @@ def _get_editable_info(dist: BaseDistribution) -> _EditableInfo:
         return _EditableInfo(
             requirement=location,
             comments=[
-                f"# Editable {vcs_name} install ({display}) with either a deleted "
-                f"local remote or invalid URI:",
+                f"# Editable {vcs_name} install ({display}) with either a deleted " f"local remote or invalid URI:",
                 f"# '{ex.url}'",
             ],
         )
     except BadCommand:
         logger.warning(
-            "cannot determine version of editable source in %s "
-            "(%s command not found in path)",
+            "cannot determine version of editable source in %s " "(%s command not found in path)",
             location,
             vcs_backend.name,
         )

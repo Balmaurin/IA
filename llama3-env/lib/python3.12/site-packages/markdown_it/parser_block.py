@@ -1,4 +1,5 @@
 """Block-level tokenizer."""
+
 from __future__ import annotations
 
 import logging
@@ -100,9 +101,7 @@ class ParserBlock:
                 line += 1
                 state.line = line
 
-    def parse(
-        self, src: str, md: MarkdownIt, env: EnvType, outTokens: list[Token]
-    ) -> list[Token] | None:
+    def parse(self, src: str, md: MarkdownIt, env: EnvType, outTokens: list[Token]) -> list[Token] | None:
         """Process input string and push block tokens into `outTokens`."""
         if not src:
             return None

@@ -2,6 +2,7 @@
 Creates missing directories, __init__.py and minimal stubs without touching existing code.
 Run once with: python setup_scaffold.py
 """
+
 import os
 from pathlib import Path
 
@@ -11,6 +12,7 @@ routers_dir = apps_dir / "sheily_routers"
 core_dir = apps_dir / "sheily_core"
 modules_base = apps_dir / "sheily_modules"
 
+
 # ------------- helpers -----------------
 def ensure_file(path: Path, content: str = ""):
     if not path.exists():
@@ -19,36 +21,32 @@ def ensure_file(path: Path, content: str = ""):
             f.write(content)
         print("[CREATE]", path.relative_to(aProjectRoot))
 
+
 # ------------- main.py ------------------
 main_py = apps_dir / "main.py"
 main_py_content = (
     "from fastapi import FastAPI\n"
     "from sheily_core.orchestrator import orchestrator_boot\n"
     "from sheily_routers.sheily_status_router import router as status_router\n\n"
-    "app = FastAPI(title=\"Shaley Orchestrator API\")\n"
-    "app.include_router(status_router, prefix=\"/status\")\n\n"
-    "@app.on_event(\"startup\")\n"
+    'app = FastAPI(title="Shaley Orchestrator API")\n'
+    'app.include_router(status_router, prefix="/status")\n\n'
+    '@app.on_event("startup")\n'
     "async def startup_event():\n"
     "    orchestrator_boot()\n\n"
-    "@app.get(\"/\")\n"
+    '@app.get("/")\n'
     "async def root():\n"
-    "    return {\"message\": \"SHEILY-light API running\"}\n"
+    '    return {"message": "SHEILY-light API running"}\n'
 )
 ensure_file(main_py, main_py_content)
 
 # ------------- core orchestrator ---------
 ensure_file(core_dir / "__init__.py", "")
 orc_py = core_dir / "orchestrator.py"
-orc_content = (
-    "def orchestrator_boot():\n"
-    "    print('Shaley Orchestrator arrancó correctamente.')\n"
-)
+orc_content = "def orchestrator_boot():\n" "    print('Shaley Orchestrator arrancó correctamente.')\n"
 ensure_file(orc_py, orc_content)
 
 # ------------- routers -----------------
-router_names = [
-    "auth", "chat", "tokens", "tasks", "status", "config"
-]
+router_names = ["auth", "chat", "tokens", "tasks", "status", "config"]
 for name in router_names:
     path = routers_dir / f"sheily_{name}_router.py"
     content = (

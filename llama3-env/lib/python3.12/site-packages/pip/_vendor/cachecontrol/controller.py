@@ -198,10 +198,7 @@ class CacheController:
         # Client can try to refresh the value by repeating the request
         # with cache busting headers as usual (ie no-cache).
         if int(resp.status) in PERMANENT_REDIRECT_STATUSES:
-            msg = (
-                "Returning cached permanent redirect response "
-                "(ignoring date and etag information)"
-            )
+            msg = "Returning cached permanent redirect response " "(ignoring date and etag information)"
             logger.debug(msg)
             return resp
 
@@ -250,9 +247,7 @@ class CacheController:
         max_age = cc.get("max-age")
         if max_age is not None:
             freshness_lifetime = max_age
-            logger.debug(
-                "Freshness lifetime from request max-age: %i", freshness_lifetime
-            )
+            logger.debug("Freshness lifetime from request max-age: %i", freshness_lifetime)
 
         min_fresh = cc.get("min-fresh")
         if min_fresh is not None:
@@ -335,14 +330,10 @@ class CacheController:
         #                handle byte range requests
         cacheable_status_codes = status_codes or self.cacheable_status_codes
         if response.status not in cacheable_status_codes:
-            logger.debug(
-                "Status code %s not in %s", response.status, cacheable_status_codes
-            )
+            logger.debug("Status code %s not in %s", response.status, cacheable_status_codes)
             return
 
-        response_headers: CaseInsensitiveDict[str] = CaseInsensitiveDict(
-            response.headers
-        )
+        response_headers: CaseInsensitiveDict[str] = CaseInsensitiveDict(response.headers)
 
         if "date" in response_headers:
             time_tuple = parsedate_tz(response_headers["date"])
@@ -443,11 +434,7 @@ class CacheController:
                     else:
                         expires_time = None
 
-                    logger.debug(
-                        "Caching b/c of expires header. expires in {} seconds".format(
-                            expires_time
-                        )
-                    )
+                    logger.debug("Caching b/c of expires header. expires in {} seconds".format(expires_time))
                     self._cache_set(
                         cache_url,
                         request,
@@ -456,9 +443,7 @@ class CacheController:
                         expires_time,
                     )
 
-    def update_cached_response(
-        self, request: PreparedRequest, response: HTTPResponse
-    ) -> HTTPResponse:
+    def update_cached_response(self, request: PreparedRequest, response: HTTPResponse) -> HTTPResponse:
         """On a 304 we will get a new set of headers that we want to
         update our cached value with, assuming we have one.
 
@@ -482,13 +467,7 @@ class CacheController:
         # typical assumptions.
         excluded_headers = ["content-length"]
 
-        cached_response.headers.update(
-            {
-                k: v
-                for k, v in response.headers.items()
-                if k.lower() not in excluded_headers
-            }
-        )
+        cached_response.headers.update({k: v for k, v in response.headers.items() if k.lower() not in excluded_headers})
 
         # we want a 200 b/c we have content via the cache
         cached_response.status = 200

@@ -75,9 +75,7 @@ if TYPE_CHECKING:
 pytest_plugins = ["pytester_assertions"]
 
 
-IGNORE_PAM = [  # filenames added when obtaining details about the current user
-    "/var/lib/sss/mc/passwd"
-]
+IGNORE_PAM = ["/var/lib/sss/mc/passwd"]  # filenames added when obtaining details about the current user
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -94,15 +92,10 @@ def pytest_addoption(parser: Parser) -> None:
         default="inprocess",
         dest="runpytest",
         choices=("inprocess", "subprocess"),
-        help=(
-            "Run pytest sub runs in tests using an 'inprocess' "
-            "or 'subprocess' (python -m main) method"
-        ),
+        help=("Run pytest sub runs in tests using an 'inprocess' " "or 'subprocess' (python -m main) method"),
     )
 
-    parser.addini(
-        "pytester_example_dir", help="Directory to take the pytester example files from"
-    )
+    parser.addini("pytester_example_dir", help="Directory to take the pytester example files from")
 
 
 def pytest_configure(config: Config) -> None:
@@ -136,10 +129,7 @@ class LsofFdLeakChecker:
 
         def isopen(line: str) -> bool:
             return line.startswith("f") and (
-                "deleted" not in line
-                and "mem" not in line
-                and "txt" not in line
-                and "cwd" not in line
+                "deleted" not in line and "mem" not in line and "txt" not in line and "cwd" not in line
             )
 
         open_files = []
@@ -255,9 +245,7 @@ class HookRecorder:
     before propagating the normal calls.
     """
 
-    def __init__(
-        self, pluginmanager: PytestPluginManager, *, _ispytest: bool = False
-    ) -> None:
+    def __init__(self, pluginmanager: PytestPluginManager, *, _ispytest: bool = False) -> None:
         check_ispytest(_ispytest)
 
         self._pluginmanager = pluginmanager
@@ -370,14 +358,9 @@ class HookRecorder:
             if not inamepart or inamepart in rep.nodeid.split("::"):
                 values.append(rep)
         if not values:
-            raise ValueError(
-                f"could not find test report matching {inamepart!r}: "
-                "no test reports at all!"
-            )
+            raise ValueError(f"could not find test report matching {inamepart!r}: " "no test reports at all!")
         if len(values) > 1:
-            raise ValueError(
-                f"found 2 or more testreports matching {inamepart!r}: {values}"
-            )
+            raise ValueError(f"found 2 or more testreports matching {inamepart!r}: {values}")
         return values[0]
 
     @overload
@@ -423,9 +406,7 @@ class HookRecorder:
         passed = []
         skipped = []
         failed = []
-        for rep in self.getreports(
-            ("pytest_collectreport", "pytest_runtest_logreport")
-        ):
+        for rep in self.getreports(("pytest_collectreport", "pytest_runtest_logreport")):
             if rep.passed:
                 if rep.when == "call":
                     assert isinstance(rep, TestReport)
@@ -474,9 +455,7 @@ def LineMatcher_fixture(request: FixtureRequest) -> type[LineMatcher]:
 
 
 @fixture
-def pytester(
-    request: FixtureRequest, tmp_path_factory: TempPathFactory, monkeypatch: MonkeyPatch
-) -> Pytester:
+def pytester(request: FixtureRequest, tmp_path_factory: TempPathFactory, monkeypatch: MonkeyPatch) -> Pytester:
     """
     Facilities to write tests/configuration files, execute pytest in isolation, and match
     against expected output, perfect for black-box testing of pytest plugins.
@@ -630,9 +609,7 @@ class SysModulesSnapshot:
 
     def restore(self) -> None:
         if self.__preserve:
-            self.__saved.update(
-                (k, m) for k, m in sys.modules.items() if self.__preserve(k)
-            )
+            self.__saved.update((k, m) for k, m in sys.modules.items() if self.__preserve(k))
         sys.modules.clear()
         sys.modules.update(self.__saved)
 
@@ -672,9 +649,7 @@ class Pytester:
     ) -> None:
         check_ispytest(_ispytest)
         self._request = request
-        self._mod_collections: WeakKeyDictionary[Collector, list[Item | Collector]] = (
-            WeakKeyDictionary()
-        )
+        self._mod_collections: WeakKeyDictionary[Collector, list[Item | Collector]] = WeakKeyDictionary()
         if request.function:
             name: str = request.function.__name__
         else:
@@ -763,9 +738,7 @@ class Pytester:
             raise TypeError("ext must not be None")
 
         if ext and not ext.startswith("."):
-            raise ValueError(
-                f"pytester.makefile expects a file extension, try .{ext} instead of {ext}"
-            )
+            raise ValueError(f"pytester.makefile expects a file extension, try .{ext} instead of {ext}")
 
         def to_text(s: Any | bytes) -> str:
             return s.decode(encoding) if isinstance(s, bytes) else str(s)
@@ -956,9 +929,7 @@ class Pytester:
             elif maybe_file.is_file():
                 example_path = maybe_file
             else:
-                raise LookupError(
-                    f"{func_name} can't be found as module or package in {example_dir}"
-                )
+                raise LookupError(f"{func_name} can't be found as module or package in {example_dir}")
         else:
             example_path = example_dir.joinpath(name)
 
@@ -970,9 +941,7 @@ class Pytester:
             shutil.copy(example_path, result)
             return result
         else:
-            raise LookupError(
-                f'example "{example_path}" is not found as a file or directory'
-            )
+            raise LookupError(f'example "{example_path}" is not found as a file or directory')
 
     def getnode(self, config: Config, arg: str | os.PathLike[str]) -> Collector | Item:
         """Get the collection node of a file.
@@ -1148,9 +1117,7 @@ class Pytester:
             for finalizer in finalizers:
                 finalizer()
 
-    def runpytest_inprocess(
-        self, *args: str | os.PathLike[str], **kwargs: Any
-    ) -> RunResult:
+    def runpytest_inprocess(self, *args: str | os.PathLike[str], **kwargs: Any) -> RunResult:
         """Return result of running pytest in-process, providing a similar
         interface to what self.runpytest() provides."""
         syspathinsert = kwargs.pop("syspathinsert", False)
@@ -1186,9 +1153,7 @@ class Pytester:
             sys.stderr.write(err)
 
         assert reprec.ret is not None
-        res = RunResult(
-            reprec.ret, out.splitlines(), err.splitlines(), instant.elapsed().seconds
-        )
+        res = RunResult(reprec.ret, out.splitlines(), err.splitlines(), instant.elapsed().seconds)
         res.reprec = reprec  # type: ignore
         return res
 
@@ -1202,17 +1167,13 @@ class Pytester:
             return self.runpytest_subprocess(*new_args, **kwargs)
         raise RuntimeError(f"Unrecognized runpytest option: {self._method}")
 
-    def _ensure_basetemp(
-        self, args: Sequence[str | os.PathLike[str]]
-    ) -> list[str | os.PathLike[str]]:
+    def _ensure_basetemp(self, args: Sequence[str | os.PathLike[str]]) -> list[str | os.PathLike[str]]:
         new_args = list(args)
         for x in new_args:
             if str(x).startswith("--basetemp"):
                 break
         else:
-            new_args.append(
-                "--basetemp={}".format(self.path.parent.joinpath("basetemp"))
-            )
+            new_args.append("--basetemp={}".format(self.path.parent.joinpath("basetemp")))
         return new_args
 
     def parseconfig(self, *args: str | os.PathLike[str]) -> Config:
@@ -1250,9 +1211,7 @@ class Pytester:
         config._do_configure()
         return config
 
-    def getitem(
-        self, source: str | os.PathLike[str], funcname: str = "test_func"
-    ) -> Item:
+    def getitem(self, source: str | os.PathLike[str], funcname: str = "test_func") -> Item:
         """Return the test item for a test function.
 
         Writes the source to a python file and runs pytest's collection on
@@ -1347,9 +1306,7 @@ class Pytester:
         You probably want to use :py:meth:`run` instead.
         """
         env = os.environ.copy()
-        env["PYTHONPATH"] = os.pathsep.join(
-            filter(None, [os.getcwd(), env.get("PYTHONPATH", "")])
-        )
+        env["PYTHONPATH"] = os.pathsep.join(filter(None, [os.getcwd(), env.get("PYTHONPATH", "")]))
         kw["env"] = env
 
         if stdin is self.CLOSE_STDIN:
@@ -1472,9 +1429,7 @@ class Pytester:
         """Run ``python -c "command"``."""
         return self.run(sys.executable, "-c", command)
 
-    def runpytest_subprocess(
-        self, *args: str | os.PathLike[str], timeout: float | None = None
-    ) -> RunResult:
+    def runpytest_subprocess(self, *args: str | os.PathLike[str], timeout: float | None = None) -> RunResult:
         """Run pytest as a subprocess with given arguments.
 
         Any plugins added to the :py:attr:`plugins` list will be added using the
@@ -1588,9 +1543,7 @@ class LineMatcher:
         __tracebackhide__ = True
         self._match_lines_random(lines2, lambda name, pat: bool(re.match(pat, name)))
 
-    def _match_lines_random(
-        self, lines2: Sequence[str], match_func: Callable[[str, str], bool]
-    ) -> None:
+    def _match_lines_random(self, lines2: Sequence[str], match_func: Callable[[str, str], bool]) -> None:
         __tracebackhide__ = True
         lines2 = self._getlines(lines2)
         for line in lines2:
@@ -1620,9 +1573,7 @@ class LineMatcher:
     def _log_text(self) -> str:
         return "\n".join(self._log_output)
 
-    def fnmatch_lines(
-        self, lines2: Sequence[str], *, consecutive: bool = False
-    ) -> None:
+    def fnmatch_lines(self, lines2: Sequence[str], *, consecutive: bool = False) -> None:
         """Check lines exist in the output (using :func:`python:fnmatch.fnmatch`).
 
         The argument is a list of lines which have to match and can use glob
@@ -1635,9 +1586,7 @@ class LineMatcher:
         __tracebackhide__ = True
         self._match_lines(lines2, fnmatch, "fnmatch", consecutive=consecutive)
 
-    def re_match_lines(
-        self, lines2: Sequence[str], *, consecutive: bool = False
-    ) -> None:
+    def re_match_lines(self, lines2: Sequence[str], *, consecutive: bool = False) -> None:
         """Check lines exist in the output (using :func:`python:re.match`).
 
         The argument is a list of lines which have to match using ``re.match``.
@@ -1697,23 +1646,17 @@ class LineMatcher:
                     break
                 elif match_func(nextline, line):
                     self._log(f"{match_nickname}:", repr(line))
-                    self._log(
-                        "{:>{width}}".format("with:", width=wnick), repr(nextline)
-                    )
+                    self._log("{:>{width}}".format("with:", width=wnick), repr(nextline))
                     started = True
                     break
                 else:
                     if consecutive and started:
                         msg = f"no consecutive match: {line!r}"
                         self._log(msg)
-                        self._log(
-                            "{:>{width}}".format("with:", width=wnick), repr(nextline)
-                        )
+                        self._log("{:>{width}}".format("with:", width=wnick), repr(nextline))
                         self._fail(msg)
                     if not nomatchprinted:
-                        self._log(
-                            "{:>{width}}".format("nomatch:", width=wnick), repr(line)
-                        )
+                        self._log("{:>{width}}".format("nomatch:", width=wnick), repr(line))
                         nomatchprinted = True
                     self._log("{:>{width}}".format("and:", width=wnick), repr(nextline))
                 extralines.append(nextline)
@@ -1737,13 +1680,9 @@ class LineMatcher:
         :param str pat: The regular expression to match lines.
         """
         __tracebackhide__ = True
-        self._no_match_line(
-            pat, lambda name, pat: bool(re.match(pat, name)), "re.match"
-        )
+        self._no_match_line(pat, lambda name, pat: bool(re.match(pat, name)), "re.match")
 
-    def _no_match_line(
-        self, pat: str, match_func: Callable[[str, str], bool], match_nickname: str
-    ) -> None:
+    def _no_match_line(self, pat: str, match_func: Callable[[str, str], bool], match_nickname: str) -> None:
         """Ensure captured lines does not have a the given pattern, using ``fnmatch.fnmatch``.
 
         :param str pat: The pattern to match lines.

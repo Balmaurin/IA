@@ -24,15 +24,9 @@ def fragments_join(state: StateInline) -> None:
         if state.tokens[curr].nesting > 0:
             level += 1  # opening tag
 
-        if (
-            state.tokens[curr].type == "text"
-            and curr + 1 < maximum
-            and state.tokens[curr + 1].type == "text"
-        ):
+        if state.tokens[curr].type == "text" and curr + 1 < maximum and state.tokens[curr + 1].type == "text":
             # collapse two adjacent text nodes
-            state.tokens[curr + 1].content = (
-                state.tokens[curr].content + state.tokens[curr + 1].content
-            )
+            state.tokens[curr + 1].content = state.tokens[curr].content + state.tokens[curr + 1].content
         else:
             if curr != last:
                 state.tokens[last] = state.tokens[curr]

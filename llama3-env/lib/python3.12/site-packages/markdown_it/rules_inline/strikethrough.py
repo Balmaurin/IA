@@ -80,10 +80,7 @@ def _postProcess(state: StateInline, delimiters: list[Delimiter]) -> None:
         token.markup = "~~"
         token.content = ""
 
-        if (
-            state.tokens[endDelim.token - 1].type == "text"
-            and state.tokens[endDelim.token - 1].content == "~"
-        ):
+        if state.tokens[endDelim.token - 1].type == "text" and state.tokens[endDelim.token - 1].content == "~":
             loneMarkers.append(endDelim.token - 1)
 
         i += 1

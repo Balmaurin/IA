@@ -43,9 +43,7 @@ class CacheControlAdapter(HTTPAdapter):
         self.cacheable_methods = cacheable_methods or ("GET",)
 
         controller_factory = controller_class or CacheController
-        self.controller = controller_factory(
-            self.cache, cache_etags=cache_etags, serializer=serializer
-        )
+        self.controller = controller_factory(self.cache, cache_etags=cache_etags, serializer=serializer)
 
     def send(
         self,
@@ -53,7 +51,7 @@ class CacheControlAdapter(HTTPAdapter):
         stream: bool = False,
         timeout: None | float | tuple[float, float] | tuple[float, None] = None,
         verify: bool | str = True,
-        cert: (None | bytes | str | tuple[bytes | str, bytes | str]) = None,
+        cert: None | bytes | str | tuple[bytes | str, bytes | str] = None,
         proxies: Mapping[str, str] | None = None,
         cacheable_methods: Collection[str] | None = None,
     ) -> Response:
@@ -103,9 +101,7 @@ class CacheControlAdapter(HTTPAdapter):
                 # that we've been expired already or that we simply
                 # have an etag. In either case, we want to try and
                 # update the cache if that is the case.
-                cached_response = self.controller.update_cached_response(
-                    request, response
-                )
+                cached_response = self.controller.update_cached_response(request, response)
 
                 if cached_response is not response:
                     from_cache = True
@@ -127,9 +123,7 @@ class CacheControlAdapter(HTTPAdapter):
                 #   response when the stream has been consumed.
                 response._fp = CallbackFileWrapper(  # type: ignore[assignment]
                     response._fp,  # type: ignore[arg-type]
-                    functools.partial(
-                        self.controller.cache_response, request, response
-                    ),
+                    functools.partial(self.controller.cache_response, request, response),
                 )
                 if response.chunked:
                     super_update_chunk_length = response._update_chunk_length

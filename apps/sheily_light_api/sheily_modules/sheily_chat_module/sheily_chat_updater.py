@@ -1,12 +1,27 @@
-import requests
+from typing import Dict, Union
+from sheily_modules.sheily_model_inference.ollama_client import OllamaClient
 
-OLLAMA_PULL_URL = "http://localhost:11434/api/pull"
 
-def download_model(model_name: str) -> dict:
-    payload = {"name": model_name}
+def download_model(model_name: str) -> Dict[str, str]:
+    """Descarga un modelo de Ollama.
+
+    Args:
+        model_name: Nombre del modelo a descargar
+
+    Returns:
+        Dict[str, str]: Diccionario con el estado de la operación o un mensaje de error
+    """
     try:
-        r = requests.post(OLLAMA_PULL_URL, json=payload, timeout=600)
-        r.raise_for_status()
-        return {"status": "downloaded", "model": model_name}
+        with OllamaClient() as client:
+            # Usar el cliente para hacer la solicitud de descarga
+            response = client._client.post(
+                "/api/pull",
+                json={"name": model_name},
+                timeout=600
+            )
+            response.raise_for_status()
+            return {"status": "downloaded", "model": model_name}
     except Exception as e:
-        return {"error": str(e)}
+        error_msg = f"Error al descargar el modelo {model_name}: {str(e)}"
+        print(error_msg)  # Para depuración
+        return {"error": error_msg}

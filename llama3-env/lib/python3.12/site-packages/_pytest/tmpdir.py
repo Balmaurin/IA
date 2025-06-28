@@ -88,15 +88,11 @@ class TempPathFactory:
         check_ispytest(_ispytest)
         count = int(config.getini("tmp_path_retention_count"))
         if count < 0:
-            raise ValueError(
-                f"tmp_path_retention_count must be >= 0. Current input: {count}."
-            )
+            raise ValueError(f"tmp_path_retention_count must be >= 0. Current input: {count}.")
 
         policy = config.getini("tmp_path_retention_policy")
         if policy not in ("all", "failed", "none"):
-            raise ValueError(
-                f"tmp_path_retention_policy must be either all, failed, none. Current input: {policy}."
-            )
+            raise ValueError(f"tmp_path_retention_policy must be either all, failed, none. Current input: {policy}.")
 
         return cls(
             given_basetemp=config.option.basetemp,
@@ -252,9 +248,7 @@ def _mk_tmp(request: FixtureRequest, factory: TempPathFactory) -> Path:
 
 
 @fixture
-def tmp_path(
-    request: FixtureRequest, tmp_path_factory: TempPathFactory
-) -> Generator[Path]:
+def tmp_path(request: FixtureRequest, tmp_path_factory: TempPathFactory) -> Generator[Path]:
     """Return a temporary directory (as :class:`pathlib.Path` object)
     which is unique to each test function invocation.
     The temporary directory is created as a subdirectory
@@ -286,11 +280,7 @@ def pytest_sessionfinish(session, exitstatus: int | ExitCode):
         return
 
     policy = tmp_path_factory._retention_policy
-    if (
-        exitstatus == 0
-        and policy == "failed"
-        and tmp_path_factory._given_basetemp is None
-    ):
+    if exitstatus == 0 and policy == "failed" and tmp_path_factory._given_basetemp is None:
         if basetemp.is_dir():
             # We do a "best effort" to remove files, but it might not be possible due to some leaked resource,
             # permissions, etc, in which case we ignore it.
@@ -302,9 +292,7 @@ def pytest_sessionfinish(session, exitstatus: int | ExitCode):
 
 
 @hookimpl(wrapper=True, tryfirst=True)
-def pytest_runtest_makereport(
-    item: Item, call
-) -> Generator[None, TestReport, TestReport]:
+def pytest_runtest_makereport(item: Item, call) -> Generator[None, TestReport, TestReport]:
     rep = yield
     assert rep.when is not None
     empty: dict[str, bool] = {}

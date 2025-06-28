@@ -12,9 +12,7 @@ if TYPE_CHECKING:
 
 
 class StateBlock(StateBase):
-    def __init__(
-        self, src: str, md: MarkdownIt, env: EnvType, tokens: list[Token]
-    ) -> None:
+    def __init__(self, src: str, md: MarkdownIt, env: EnvType, tokens: list[Token]) -> None:
         self.src = src
 
         # link to parser instance
@@ -111,10 +109,7 @@ class StateBlock(StateBase):
         self._code_enabled = "code" in self.md["block"].ruler.get_active_rules()
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}"
-            f"(line={self.line},level={self.level},tokens={len(self.tokens)})"
-        )
+        return f"{self.__class__.__name__}" f"(line={self.line},level={self.level},tokens={len(self.tokens)})"
 
     def push(self, ttype: str, tag: str, nesting: Literal[-1, 0, 1]) -> Token:
         """Push new token to "stream"."""
@@ -136,9 +131,7 @@ class StateBlock(StateBase):
         """."""
         while from_pos < self.lineMax:
             try:
-                if (self.bMarks[from_pos] + self.tShift[from_pos]) < self.eMarks[
-                    from_pos
-                ]:
+                if (self.bMarks[from_pos] + self.tShift[from_pos]) < self.eMarks[from_pos]:
                     break
             except IndexError:
                 pass
@@ -223,11 +216,7 @@ class StateBlock(StateBase):
         while line < end:
             lineIndent = 0
             lineStart = first = self.bMarks[line]
-            last = (
-                self.eMarks[line] + 1
-                if line + 1 < end or keepLastLF
-                else self.eMarks[line]
-            )
+            last = self.eMarks[line] + 1 if line + 1 < end or keepLastLF else self.eMarks[line]
 
             while (first < last) and (lineIndent < indent):
                 ch = self.src[first]

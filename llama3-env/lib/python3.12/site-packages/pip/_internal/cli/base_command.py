@@ -179,9 +179,7 @@ class Command(CommandContextMixIn):
             user_log_file=options.log,
         )
 
-        always_enabled_features = set(options.features_enabled) & set(
-            cmdoptions.ALWAYS_ENABLED_FEATURES
-        )
+        always_enabled_features = set(options.features_enabled) & set(cmdoptions.ALWAYS_ENABLED_FEATURES)
         if always_enabled_features:
             logger.warning(
                 "The following features are always enabled: %s. ",
@@ -194,9 +192,7 @@ class Command(CommandContextMixIn):
         # subprocess, which has the _PIP_RUNNING_IN_SUBPROCESS environment
         # variable set.
         if options.python and "_PIP_RUNNING_IN_SUBPROCESS" not in os.environ:
-            logger.critical(
-                "The --python option must be placed before the pip subcommand name"
-            )
+            logger.critical("The --python option must be placed before the pip subcommand name")
             sys.exit(ERROR)
 
         # TODO: Try to get these passing down from the command?

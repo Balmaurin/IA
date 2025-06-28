@@ -73,8 +73,7 @@ def get_lock_path(path: _AnyPurePath) -> _AnyPurePath:
 def on_rm_rf_error(
     func: Callable[..., Any] | None,
     path: str,
-    excinfo: BaseException
-    | tuple[type[BaseException], BaseException, types.TracebackType | None],
+    excinfo: BaseException | tuple[type[BaseException], BaseException, types.TracebackType | None],
     *,
     start_path: Path,
 ) -> bool:
@@ -93,18 +92,12 @@ def on_rm_rf_error(
         return False
 
     if not isinstance(exc, PermissionError):
-        warnings.warn(
-            PytestWarning(f"(rm_rf) error removing {path}\n{type(exc)}: {exc}")
-        )
+        warnings.warn(PytestWarning(f"(rm_rf) error removing {path}\n{type(exc)}: {exc}"))
         return False
 
     if func not in (os.rmdir, os.remove, os.unlink):
         if func not in (os.open,):
-            warnings.warn(
-                PytestWarning(
-                    f"(rm_rf) unknown function {func} when removing {path}:\n{type(exc)}: {exc}"
-                )
-            )
+            warnings.warn(PytestWarning(f"(rm_rf) unknown function {func} when removing {path}:\n{type(exc)}: {exc}"))
         return False
 
     # Chmod + retry.
@@ -237,10 +230,7 @@ def make_numbered_dir(root: Path, prefix: str, mode: int = 0o700) -> Path:
             _force_symlink(root, prefix + "current", new_path)
             return new_path
     else:
-        raise OSError(
-            "could not create numbered dir with prefix "
-            f"{prefix} in {root} after 10 tries"
-        )
+        raise OSError("could not create numbered dir with prefix " f"{prefix} in {root} after 10 tries")
 
 
 def create_cleanup_lock(p: Path) -> Path:
@@ -260,9 +250,7 @@ def create_cleanup_lock(p: Path) -> Path:
         return lock_path
 
 
-def register_cleanup_lock_removal(
-    lock_path: Path, register: Any = atexit.register
-) -> Any:
+def register_cleanup_lock_removal(lock_path: Path, register: Any = atexit.register) -> Any:
     """Register a cleanup function for removing a lock, by default on atexit."""
     pid = os.getpid()
 
@@ -360,9 +348,7 @@ def cleanup_dead_symlinks(root: Path) -> None:
                 left_dir.unlink()
 
 
-def cleanup_numbered_dir(
-    root: Path, prefix: str, keep: int, consider_lock_dead_if_created_before: float
-) -> None:
+def cleanup_numbered_dir(root: Path, prefix: str, keep: int, consider_lock_dead_if_created_before: float) -> None:
     """Cleanup for lock driven numbered directories."""
     if not root.exists():
         return
@@ -546,9 +532,7 @@ def import_path(
             with contextlib.suppress(KeyError):
                 return sys.modules[module_name]
 
-            mod = _import_module_using_spec(
-                module_name, path, pkg_root, insert_modules=False
-            )
+            mod = _import_module_using_spec(module_name, path, pkg_root, insert_modules=False)
             if mod is not None:
                 return mod
 
@@ -558,9 +542,7 @@ def import_path(
         with contextlib.suppress(KeyError):
             return sys.modules[module_name]
 
-        mod = _import_module_using_spec(
-            module_name, path, path.parent, insert_modules=True
-        )
+        mod = _import_module_using_spec(module_name, path, path.parent, insert_modules=True)
         if mod is None:
             raise ImportError(f"Can't find module {module_name} at location {path}")
         return mod
@@ -713,9 +695,7 @@ def _import_module_using_spec(
             # For a namespace package, need to manually specify a loader.
             loader = NamespaceLoader(name, module_path, PathFinder())  # type: ignore[arg-type]
 
-        spec = importlib.util.spec_from_file_location(
-            module_name, str(module_path), loader=loader
-        )
+        spec = importlib.util.spec_from_file_location(module_name, str(module_path), loader=loader)
 
     if spec_matches_module_path(spec, module_path):
         assert spec is not None
@@ -853,9 +833,7 @@ def resolve_package_path(path: Path) -> Path | None:
     return result
 
 
-def resolve_pkg_root_and_module_name(
-    path: Path, *, consider_namespace_packages: bool = False
-) -> tuple[Path, str]:
+def resolve_pkg_root_and_module_name(path: Path, *, consider_namespace_packages: bool = False) -> tuple[Path, str]:
     """
     Return the path to the directory of the root package that contains the
     given Python file, and its module name:
@@ -979,9 +957,7 @@ def scandir(
     return entries
 
 
-def visit(
-    path: str | os.PathLike[str], recurse: Callable[[os.DirEntry[str]], bool]
-) -> Iterator[os.DirEntry[str]]:
+def visit(path: str | os.PathLike[str], recurse: Callable[[os.DirEntry[str]], bool]) -> Iterator[os.DirEntry[str]]:
     """Walk a directory recursively, in breadth-first order.
 
     The `recurse` predicate determines whether a directory is recursed.

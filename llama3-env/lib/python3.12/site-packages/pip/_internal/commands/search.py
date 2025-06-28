@@ -75,9 +75,7 @@ class SearchCommand(Command, SessionCommandMixin):
         try:
             hits = pypi.search({"name": query, "summary": query}, "or")
         except xmlrpc.client.Fault as fault:
-            message = (
-                f"XMLRPC request failed [code: {fault.faultCode}]\n{fault.faultString}"
-            )
+            message = f"XMLRPC request failed [code: {fault.faultCode}]\n{fault.faultString}"
             raise CommandError(message)
         assert isinstance(hits, list)
         return hits
@@ -122,8 +120,7 @@ def print_dist_installation_info(name: str, latest: str) -> None:
                 write_output("INSTALLED: %s", dist.version)
                 if parse_version(latest).pre:
                     write_output(
-                        "LATEST:    %s (pre-release; install"
-                        " with `pip install --pre`)",
+                        "LATEST:    %s (pre-release; install" " with `pip install --pre`)",
                         latest,
                     )
                 else:
@@ -139,13 +136,7 @@ def print_results(
         return
     if name_column_width is None:
         name_column_width = (
-            max(
-                [
-                    len(hit["name"]) + len(highest_version(hit.get("versions", ["-"])))
-                    for hit in hits
-                ]
-            )
-            + 4
+            max([len(hit["name"]) + len(highest_version(hit.get("versions", ["-"]))) for hit in hits]) + 4
         )
 
     for hit in hits:

@@ -5,6 +5,7 @@ from sheily_modules.sheily_tasks_module import sheily_scheduled_tasks as schedul
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
+
 class ScanRequest(BaseModel):
     user: str
     task: str = "scan"

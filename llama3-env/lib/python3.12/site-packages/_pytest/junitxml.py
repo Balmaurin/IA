@@ -55,9 +55,7 @@ def bin_xml_escape(arg: object) -> str:
     # The spec range of valid chars is:
     # Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
     # For an unknown(?) reason, we disallow #x7F (DEL) as well.
-    illegal_xml_re = (
-        "[^\u0009\u000a\u000d\u0020-\u007e\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
-    )
+    illegal_xml_re = "[^\u0009\u000a\u000d\u0020-\u007e\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
     return re.sub(illegal_xml_re, repl, str(arg))
 
 
@@ -196,9 +194,7 @@ class _NodeReporter:
             self._add_simple("skipped", "xfail-marked test passes unexpectedly")
         else:
             assert report.longrepr is not None
-            reprcrash: ReprFileLocation | None = getattr(
-                report.longrepr, "reprcrash", None
-            )
+            reprcrash: ReprFileLocation | None = getattr(report.longrepr, "reprcrash", None)
             if reprcrash is not None:
                 message = reprcrash.message
             else:
@@ -243,9 +239,7 @@ class _NodeReporter:
                 skipreason = skipreason[9:]
             details = f"{filename}:{lineno}: {skipreason}"
 
-            skipped = ET.Element(
-                "skipped", type="pytest.skip", message=bin_xml_escape(skipreason)
-            )
+            skipped = ET.Element("skipped", type="pytest.skip", message=bin_xml_escape(skipreason))
             skipped.text = bin_xml_escape(details)
             self.append(skipped)
             self.write_captured_output(report)
@@ -258,18 +252,14 @@ class _NodeReporter:
         self.to_xml = lambda: data  # type: ignore[method-assign]
 
 
-def _warn_incompatibility_with_xunit2(
-    request: FixtureRequest, fixture_name: str
-) -> None:
+def _warn_incompatibility_with_xunit2(request: FixtureRequest, fixture_name: str) -> None:
     """Emit a PytestWarning about the given fixture being incompatible with newer xunit revisions."""
     from _pytest.warning_types import PytestWarning
 
     xml = request.config.stash.get(xml_key, None)
     if xml is not None and xml.family not in ("xunit1", "legacy"):
         request.node.warn(
-            PytestWarning(
-                f"{fixture_name} is incompatible with junit_family '{xml.family}' (use 'legacy' or 'xunit1')"
-            )
+            PytestWarning(f"{fixture_name} is incompatible with junit_family '{xml.family}' (use 'legacy' or 'xunit1')")
         )
 
 
@@ -305,9 +295,7 @@ def record_xml_attribute(request: FixtureRequest) -> Callable[[str, object], Non
     """
     from _pytest.warning_types import PytestExperimentalApiWarning
 
-    request.node.warn(
-        PytestExperimentalApiWarning("record_xml_attribute is an experimental feature")
-    )
+    request.node.warn(PytestExperimentalApiWarning("record_xml_attribute is an experimental feature"))
 
     _warn_incompatibility_with_xunit2(request, "record_xml_attribute")
 
@@ -393,13 +381,10 @@ def pytest_addoption(parser: Parser) -> None:
         default=None,
         help="Prepend prefix to classnames in junit-xml output",
     )
-    parser.addini(
-        "junit_suite_name", "Test suite name for JUnit report", default="pytest"
-    )
+    parser.addini("junit_suite_name", "Test suite name for JUnit report", default="pytest")
     parser.addini(
         "junit_logging",
-        "Write captured log messages to JUnit report: "
-        "one of no|log|system-out|system-err|out-err|all",
+        "Write captured log messages to JUnit report: " "one of no|log|system-out|system-err|out-err|all",
         default="no",
     )
     parser.addini(
@@ -474,9 +459,7 @@ class LogXML:
         self.log_passing_tests = log_passing_tests
         self.report_duration = report_duration
         self.family = family
-        self.stats: dict[str, int] = dict.fromkeys(
-            ["error", "passed", "failure", "skipped"], 0
-        )
+        self.stats: dict[str, int] = dict.fromkeys(["error", "passed", "failure", "skipped"], 0)
         self.node_reporters: dict[tuple[str | TestReport, object], _NodeReporter] = {}
         self.node_reporters_ordered: list[_NodeReporter] = []
         self.global_properties: list[tuple[str, str]] = []

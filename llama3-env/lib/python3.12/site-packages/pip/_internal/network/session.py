@@ -126,9 +126,7 @@ def user_agent() -> str:
         pypy_version_info = sys.pypy_version_info  # type: ignore
         if pypy_version_info.releaselevel == "final":
             pypy_version_info = pypy_version_info[:3]
-        data["implementation"]["version"] = ".".join(
-            [str(x) for x in pypy_version_info]
-        )
+        data["implementation"]["version"] = ".".join([str(x) for x in pypy_version_info])
     elif data["implementation"]["name"] == "Jython":
         # Complete Guess
         data["implementation"]["version"] = platform.python_version()
@@ -181,9 +179,7 @@ def user_agent() -> str:
     if shutil.which("rustc") is not None:
         # If for any reason `rustc --version` fails, silently ignore it
         try:
-            rustc_output = subprocess.check_output(
-                ["rustc", "--version"], stderr=subprocess.STDOUT, timeout=0.5
-            )
+            rustc_output = subprocess.check_output(["rustc", "--version"], stderr=subprocess.STDOUT, timeout=0.5)
         except Exception:
             pass
         else:
@@ -407,9 +403,7 @@ class PipSession(requests.Session):
         """
         self.auth.index_urls = new_index_urls
 
-    def add_trusted_host(
-        self, host: str, source: Optional[str] = None, suppress_logging: bool = False
-    ) -> None:
+    def add_trusted_host(self, host: str, source: Optional[str] = None, suppress_logging: bool = False) -> None:
         """
         :param host: It is okay to provide a host that has previously been
             added.
@@ -428,9 +422,7 @@ class PipSession(requests.Session):
         if (parsed_host, parsed_port) not in self.pip_trusted_origins:
             self.pip_trusted_origins.append((parsed_host, parsed_port))
 
-        self.mount(
-            build_url_from_netloc(host, scheme="http") + "/", self._trusted_host_adapter
-        )
+        self.mount(build_url_from_netloc(host, scheme="http") + "/", self._trusted_host_adapter)
         self.mount(build_url_from_netloc(host) + "/", self._trusted_host_adapter)
         if not parsed_port:
             self.mount(
@@ -474,11 +466,7 @@ class PipSession(requests.Session):
             except ValueError:
                 # We don't have both a valid address or a valid network, so
                 # we'll check this origin against hostnames.
-                if (
-                    origin_host
-                    and origin_host.lower() != secure_host.lower()
-                    and secure_host != "*"
-                ):
+                if origin_host and origin_host.lower() != secure_host.lower() and secure_host != "*":
                     continue
             else:
                 # We have a valid address and network, so see if the address
@@ -487,11 +475,7 @@ class PipSession(requests.Session):
                     continue
 
             # Check to see if the port matches.
-            if (
-                origin_port != secure_port
-                and secure_port != "*"
-                and secure_port is not None
-            ):
+            if origin_port != secure_port and secure_port != "*" and secure_port is not None:
                 continue
 
             # If we've gotten here, then this origin matches the current

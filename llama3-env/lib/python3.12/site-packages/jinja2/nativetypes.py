@@ -59,9 +59,7 @@ class NativeCodeGenerator(CodeGenerator):
     def _output_const_repr(self, group: t.Iterable[t.Any]) -> str:
         return repr("".join([str(v) for v in group]))
 
-    def _output_child_to_const(
-        self, node: nodes.Expr, frame: Frame, finalize: CodeGenerator._FinalizeInfo
-    ) -> t.Any:
+    def _output_child_to_const(self, node: nodes.Expr, frame: Frame, finalize: CodeGenerator._FinalizeInfo) -> t.Any:
         const = node.as_const(frame.eval_ctx)
 
         if not has_safe_repr(const):
@@ -72,15 +70,11 @@ class NativeCodeGenerator(CodeGenerator):
 
         return finalize.const(const)  # type: ignore
 
-    def _output_child_pre(
-        self, node: nodes.Expr, frame: Frame, finalize: CodeGenerator._FinalizeInfo
-    ) -> None:
+    def _output_child_pre(self, node: nodes.Expr, frame: Frame, finalize: CodeGenerator._FinalizeInfo) -> None:
         if finalize.src is not None:
             self.write(finalize.src)
 
-    def _output_child_post(
-        self, node: nodes.Expr, frame: Frame, finalize: CodeGenerator._FinalizeInfo
-    ) -> None:
+    def _output_child_post(self, node: nodes.Expr, frame: Frame, finalize: CodeGenerator._FinalizeInfo) -> None:
         if finalize.src is not None:
             self.write(")")
 
@@ -105,17 +99,13 @@ class NativeTemplate(Template):
         ctx = self.new_context(dict(*args, **kwargs))
 
         try:
-            return self.environment_class.concat(  # type: ignore
-                self.root_render_func(ctx)
-            )
+            return self.environment_class.concat(self.root_render_func(ctx))  # type: ignore
         except Exception:
             return self.environment.handle_exception()
 
     async def render_async(self, *args: t.Any, **kwargs: t.Any) -> t.Any:
         if not self.environment.is_async:
-            raise RuntimeError(
-                "The environment was not created with async mode enabled."
-            )
+            raise RuntimeError("The environment was not created with async mode enabled.")
 
         ctx = self.new_context(dict(*args, **kwargs))
 

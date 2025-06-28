@@ -425,18 +425,14 @@ def parse_email(data: bytes | str) -> tuple[RawMetadata, dict[str, list[str]]]:
     try:
         payload = _get_payload(parsed, data)
     except ValueError:
-        unparsed.setdefault("description", []).append(
-            parsed.get_payload(decode=isinstance(data, bytes))
-        )
+        unparsed.setdefault("description", []).append(parsed.get_payload(decode=isinstance(data, bytes)))
     else:
         if payload:
             # Check to see if we've already got a description, if so then both
             # it, and this body move to unparseable.
             if "description" in raw:
                 description_header = cast(str, raw.pop("description"))
-                unparsed.setdefault("description", []).extend(
-                    [description_header, payload]
-                )
+                unparsed.setdefault("description", []).extend([description_header, payload])
             elif "description" in unparsed:
                 unparsed["description"].append(payload)
             else:
@@ -511,12 +507,8 @@ class _Validator(Generic[T]):
 
         return cast(T, value)
 
-    def _invalid_metadata(
-        self, msg: str, cause: Exception | None = None
-    ) -> InvalidMetadata:
-        exc = InvalidMetadata(
-            self.raw_name, msg.format_map({"field": repr(self.raw_name)})
-        )
+    def _invalid_metadata(self, msg: str, cause: Exception | None = None) -> InvalidMetadata:
+        exc = InvalidMetadata(self.raw_name, msg.format_map({"field": repr(self.raw_name)}))
         exc.__cause__ = cause
         return exc
 
@@ -533,9 +525,7 @@ class _Validator(Generic[T]):
         try:
             utils.canonicalize_name(value, validate=True)
         except utils.InvalidName as exc:
-            raise self._invalid_metadata(
-                f"{value!r} is invalid for {{field}}", cause=exc
-            )
+            raise self._invalid_metadata(f"{value!r} is invalid for {{field}}", cause=exc)
         else:
             return value
 
@@ -545,9 +535,7 @@ class _Validator(Generic[T]):
         try:
             return version_module.parse(value)
         except version_module.InvalidVersion as exc:
-            raise self._invalid_metadata(
-                f"{value!r} is invalid for {{field}}", cause=exc
-            )
+            raise self._invalid_metadata(f"{value!r} is invalid for {{field}}", cause=exc)
 
     def _process_summary(self, value: str) -> str:
         """Check the field contains no newlines."""
@@ -568,31 +556,24 @@ class _Validator(Generic[T]):
         # Check if content-type is valid or defaulted to `text/plain` and thus was
         # not parseable.
         if content_type not in content_types or content_type not in value.lower():
-            raise self._invalid_metadata(
-                f"{{field}} must be one of {list(content_types)}, not {value!r}"
-            )
+            raise self._invalid_metadata(f"{{field}} must be one of {list(content_types)}, not {value!r}")
 
         charset = parameters.get("charset", "UTF-8")
         if charset != "UTF-8":
-            raise self._invalid_metadata(
-                f"{{field}} can only specify the UTF-8 charset, not {list(charset)}"
-            )
+            raise self._invalid_metadata(f"{{field}} can only specify the UTF-8 charset, not {list(charset)}")
 
         markdown_variants = {"GFM", "CommonMark"}
         variant = parameters.get("variant", "GFM")  # Use an acceptable default.
         if content_type == "text/markdown" and variant not in markdown_variants:
             raise self._invalid_metadata(
-                f"valid Markdown variants for {{field}} are {list(markdown_variants)}, "
-                f"not {variant!r}",
+                f"valid Markdown variants for {{field}} are {list(markdown_variants)}, " f"not {variant!r}",
             )
         return value
 
     def _process_dynamic(self, value: list[str]) -> list[str]:
         for dynamic_field in map(str.lower, value):
             if dynamic_field in {"name", "version", "metadata-version"}:
-                raise self._invalid_metadata(
-                    f"{value!r} is not allowed as a dynamic field"
-                )
+                raise self._invalid_metadata(f"{value!r} is not allowed as a dynamic field")
             elif dynamic_field not in _EMAIL_TO_RAW_MAPPING:
                 raise self._invalid_metadata(f"{value!r} is not a valid dynamic field")
         return list(map(str.lower, value))
@@ -606,9 +587,7 @@ class _Validator(Generic[T]):
             for name in value:
                 normalized_names.append(utils.canonicalize_name(name, validate=True))
         except utils.InvalidName as exc:
-            raise self._invalid_metadata(
-                f"{name!r} is invalid for {{field}}", cause=exc
-            )
+            raise self._invalid_metadata(f"{name!r} is invalid for {{field}}", cause=exc)
         else:
             return normalized_names
 
@@ -616,9 +595,7 @@ class _Validator(Generic[T]):
         try:
             return specifiers.SpecifierSet(value)
         except specifiers.InvalidSpecifier as exc:
-            raise self._invalid_metadata(
-                f"{value!r} is invalid for {{field}}", cause=exc
-            )
+            raise self._invalid_metadata(f"{value!r} is invalid for {{field}}", cause=exc)
 
     def _process_requires_dist(
         self,
@@ -681,9 +658,7 @@ class Metadata:
                             exc = InvalidMetadata(key, f"unrecognized field: {key!r}")
                             exceptions.append(exc)
                             continue
-                        field_age = _VALID_METADATA_VERSIONS.index(
-                            field_metadata_version
-                        )
+                        field_age = _VALID_METADATA_VERSIONS.index(field_metadata_version)
                         if field_age > metadata_age:
                             field = _RAW_TO_EMAIL_MAPPING[key]
                             exc = InvalidMetadata(
@@ -726,9 +701,7 @@ class Metadata:
         try:
             return cls.from_raw(raw, validate=validate)
         except ExceptionGroup as exc_group:
-            raise ExceptionGroup(
-                "invalid or unparsed metadata", exc_group.exceptions
-            ) from None
+            raise ExceptionGroup("invalid or unparsed metadata", exc_group.exceptions) from None
 
     metadata_version: _Validator[_MetadataVersion] = _Validator()
     """:external:ref:`core-metadata-metadata-version`
@@ -772,13 +745,9 @@ class Metadata:
     """:external:ref:`core-metadata-license`"""
     classifiers: _Validator[list[str] | None] = _Validator(added="1.1")
     """:external:ref:`core-metadata-classifier`"""
-    requires_dist: _Validator[list[requirements.Requirement] | None] = _Validator(
-        added="1.2"
-    )
+    requires_dist: _Validator[list[requirements.Requirement] | None] = _Validator(added="1.2")
     """:external:ref:`core-metadata-requires-dist`"""
-    requires_python: _Validator[specifiers.SpecifierSet | None] = _Validator(
-        added="1.2"
-    )
+    requires_python: _Validator[specifiers.SpecifierSet | None] = _Validator(added="1.2")
     """:external:ref:`core-metadata-requires-python`"""
     # Because `Requires-External` allows for non-PEP 440 version specifiers, we
     # don't do any processing on the values.

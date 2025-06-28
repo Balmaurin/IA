@@ -34,7 +34,7 @@ def import_toml() -> None:
         try:
             import tomli
         except ImportError as e:  # pragma: no cover
-            raise ImportError('tomli is not installed, run `pip install pydantic-settings[toml]`') from e
+            raise ImportError("tomli is not installed, run `pip install pydantic-settings[toml]`") from e
     else:
         if tomllib is not None:
             return
@@ -51,16 +51,16 @@ class TomlConfigSettingsSource(InitSettingsSource, ConfigFileSourceMixin):
         settings_cls: type[BaseSettings],
         toml_file: PathType | None = DEFAULT_PATH,
     ):
-        self.toml_file_path = toml_file if toml_file != DEFAULT_PATH else settings_cls.model_config.get('toml_file')
+        self.toml_file_path = toml_file if toml_file != DEFAULT_PATH else settings_cls.model_config.get("toml_file")
         self.toml_data = self._read_files(self.toml_file_path)
         super().__init__(settings_cls, self.toml_data)
 
     def _read_file(self, file_path: Path) -> dict[str, Any]:
         import_toml()
-        with open(file_path, mode='rb') as toml_file:
+        with open(file_path, mode="rb") as toml_file:
             if sys.version_info < (3, 11):
                 return tomli.load(toml_file)
             return tomllib.load(toml_file)
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(toml_file={self.toml_file_path})'
+        return f"{self.__class__.__name__}(toml_file={self.toml_file_path})"

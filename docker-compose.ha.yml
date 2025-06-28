@@ -1,0 +1,168 @@
+version: '3.9'
+
+x-common-variables: &common-variables
+  # Configuración común para todos los servicios
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+  POSTGRES_DB: ${POSTGRES_DB:-sheily}
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-changeme}
+  REDIS_MASTER_NAME: ${REDIS_MASTER_NAME:-mymaster}
+  REPLICATION_USER: ${REPLICATION_USER:-repl_user}
+  REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-repl_password}
+  PGPOOL_USER: ${PGPOOL_USER:-pgpool}
+  PGPOOL_PASSWORD: ${PGPOOL_PASSWORD:-pgpoolpass}
+
+services:
+  # Servicio de API con múltiples réplicas
+  api:
+    image: sheily-api:latest
+    deploy:
+      mode: replicated
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgpool:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis-sentinel:26379/0?sentinel_service_name=${REDIS_MASTER_NAME}
+    networks:
+      - backend
+    depends_on:
+      - pgpool
+      - redis-sentinel
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Configuración de PostgreSQL con replicación
+  postgres-master:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - REPLICATION_USER=${REPLICATION_USER}
+      - REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
+    volumes:
+      - postgres_master_data:/var/lib/postgresql/data
+      - ./postgres/initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  postgres-replica:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - REPLICATION_USER=${REPLICATION_USER}
+      - REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
+      - PRIMARY_HOST=postgres-master
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+    command: >
+      bash -c "
+      echo \"host replication all 0.0.0.0/0 md5\" >> /usr/share/postgresql/postgresql.conf.sample &&
+      docker-entrypoint.sh postgres
+      "
+    networks:
+      - backend
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.role == worker]
+
+  # Pgpool-II para balanceo de carga y failover
+  pgpool:
+    image: bitnami/pgpool:latest
+    environment:
+      - PGPOOL_BACKEND_NODES=0:postgres-master:5432,1:postgres-replica:5432
+      - PGPOOL_SR_CHECK_USER=${PGPOOL_USER}
+      - PGPOOL_SR_CHECK_PASSWORD=${PGPOOL_PASSWORD}
+      - PGPOOL_ENABLE_LOAD_BALANCING=yes
+      - PGPOOL_ENABLE_POOL_HBA=yes
+      - PGPOOL_USER=${POSTGRES_USER}
+      - PGPOOL_PASSWORD=${POSTGRES_PASSWORD}
+      - PGPOOL_ADMIN_USER=admin
+      - PGPOOL_ADMIN_PASSWORD=${PGPOOL_ADMIN_PASSWORD:-adminpass}
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    depends_on:
+      - postgres-master
+      - postgres-replica
+
+  # Redis Sentinel para alta disponibilidad
+  redis-master:
+    image: redis:alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis_master_data:/data
+    networks:
+      - backend
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  redis-replica:
+    image: redis:alpine
+    command: redis-server --replicaof redis-master 6379 --masterauth ${REDIS_PASSWORD} --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis_replica_data:/data
+    networks:
+      - backend
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.role == worker]
+    depends_on:
+      - redis-master
+
+  redis-sentinel:
+    image: redis:alpine
+    command: >
+      bash -c "
+      echo 'port 26379' > /usr/local/etc/redis/sentinel.conf &&
+      echo 'sentinel monitor ${REDIS_MASTER_NAME} redis-master 6379 2' >> /usr/local/etc/redis/sentinel.conf &&
+      echo 'sentinel down-after-milliseconds ${REDIS_MASTER_NAME} 5000' >> /usr/local/etc/redis/sentinel.conf &&
+      echo 'sentinel failover-timeout ${REDIS_MASTER_NAME} 60000' >> /usr/local/etc/redis/sentinel.conf &&
+      echo 'sentinel parallel-syncs ${REDIS_MASTER_NAME} 1' >> /usr/local/etc/redis/sentinel.conf &&
+      echo 'sentinel auth-pass ${REDIS_MASTER_NAME} ${REDIS_PASSWORD}' >> /usr/local/etc/redis/sentinel.conf &&
+      redis-sentinel /usr/local/etc/redis/sentinel.conf
+      "
+    networks:
+      - backend
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.role == manager || node.role == worker]
+    depends_on:
+      - redis-master
+      - redis-replica
+
+networks:
+  backend:
+    driver: overlay
+    attachable: true
+
+volumes:
+  postgres_master_data:
+  postgres_replica_data:
+  redis_master_data:
+  redis_replica_data:

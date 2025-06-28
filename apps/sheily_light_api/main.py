@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -8,19 +9,15 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 
-# Importaciones absolutas
+# Importaciones de la aplicación
 from sheily_light_api.sheily_core.orchestrator import orchestrator_boot
-from sheily_light_api.sheily_routers \
-    .sheily_auth_router import router as auth_router
-from sheily_light_api.sheily_routers \
-    .sheily_chat_router import router as chat_router
-from sheily_light_api.sheily_routers \
-    .sheily_status_router import router as status_router
+from sheily_light_api.sheily_routers.sheily_auth_router import router as auth_router
+from sheily_light_api.sheily_routers.sheily_chat_router import router as chat_router
+from sheily_light_api.sheily_routers.sheily_status_router import router as status_router
 
 # Configuración de entorno
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 DEBUG = ENVIRONMENT == "development"
-
 
 # Lista de orígenes permitidos para CORS
 ALLOWED_ORIGINS = [
@@ -34,22 +31,23 @@ ALLOWED_ORIGINS = [
 REDIS_URL = "redis://localhost:6379"
 
 app = FastAPI(
-    title="Shaley Orchestrator API",
+    title="Sheily Light API",
+    version="0.1.0",
     debug=DEBUG,
     docs_url="/docs" if DEBUG else None,
-    redoc_url=None
+    redoc_url="/redoc" if DEBUG else None,
+    openapi_url="/openapi.json" if DEBUG else None,
 )
 
 # --- Middlewares ---
 # Configuración de CORS
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"]
+    expose_headers=["*"],
 )
 
 # Compresión GZIP
@@ -59,35 +57,33 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 if not DEBUG:
     app.add_middleware(HTTPSRedirectMiddleware)
 
+
 # Configuración de caché
 @app.on_event("startup")
 async def setup_redis_cache():
     """Configura la caché de Redis para la aplicación."""
-    redis = aioredis.from_url(
-        REDIS_URL,
-        encoding="utf8",
-        decode_responses=True
-    )
+    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
 
-# Configuración de caché
+# Configuración de la aplicación
 @app.on_event("startup")
 async def startup():
-    setup_redis_cache()
+    """Configuración inicial de la aplicación."""
+    await setup_redis_cache()
+    await orchestrator_boot()
 
 
 # --- Fin Middlewares ---
 
 # Configuración de rutas
-app.include_router(status_router, prefix="/status")
-app.include_router(chat_router, prefix="/api")
-app.include_router(auth_router, prefix="/api")
+# Include routers
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
+app.include_router(status_router, prefix="/api/status", tags=["status"])
 
 
-@app.on_event("startup")
-async def startup_event():
-    orchestrator_boot()
+# Eliminamos esta función duplicada ya que su lógica se movió a la función startup()
 
 
 @app.get("/")

@@ -2,6 +2,7 @@ import requests
 
 CENTRAL_URL = "https://sheily-central.example.com/api/chat"
 
+
 def chat_with_fallback(prompt: str, user: str) -> str:
     payload = {"message": prompt, "user": user}
     try:

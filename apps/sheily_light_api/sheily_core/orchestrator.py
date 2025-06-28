@@ -1,2 +1,2 @@
 def orchestrator_boot():
-    print('Shaley Orchestrator arrancó correctamente.')
+    print("Shaley Orchestrator arrancó correctamente.")

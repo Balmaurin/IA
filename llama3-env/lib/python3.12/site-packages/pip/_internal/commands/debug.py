@@ -38,9 +38,7 @@ def create_vendor_txt_map() -> Dict[str, str]:
     with open_text_resource("pip._vendor", "vendor.txt") as f:
         # Purge non version specifying lines.
         # Also, remove any space prefix or suffixes (including comments).
-        lines = [
-            line.strip().split(" ", 1)[0] for line in f.readlines() if "==" in line
-        ]
+        lines = [line.strip().split(" ", 1)[0] for line in f.readlines() if "==" in line]
 
     # Transform into "module" -> version dict.
     return dict(line.split("==", 1) for line in lines)
@@ -87,16 +85,10 @@ def show_actual_vendor_versions(vendor_txt_versions: Dict[str, str]) -> None:
         extra_message = ""
         actual_version = get_vendor_version_from_module(module_name)
         if not actual_version:
-            extra_message = (
-                " (Unable to locate actual module version, using"
-                " vendor.txt specified version)"
-            )
+            extra_message = " (Unable to locate actual module version, using" " vendor.txt specified version)"
             actual_version = expected_version
         elif parse_version(actual_version) != parse_version(expected_version):
-            extra_message = (
-                " (CONFLICT: vendor.txt suggests version should"
-                f" be {expected_version})"
-            )
+            extra_message = " (CONFLICT: vendor.txt suggests version should" f" be {expected_version})"
         logger.info("%s==%s%s", module_name, actual_version, extra_message)
 
 
@@ -144,9 +136,7 @@ def ca_bundle_info(config: Configuration) -> str:
         return "Not specified"
 
     levels_that_override_global = ["install", "wheel", "download"]
-    global_overriding_level = [
-        level for level in levels if level in levels_that_override_global
-    ]
+    global_overriding_level = [level for level in levels if level in levels_that_override_global]
     if not global_overriding_level:
         return "global"
 

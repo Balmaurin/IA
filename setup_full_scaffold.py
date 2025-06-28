@@ -2,6 +2,7 @@
 Creates directories/files only if missing, with minimal placeholder content.
 Run: python setup_full_scaffold.py
 """
+
 from pathlib import Path
 import textwrap
 import yaml
@@ -10,6 +11,7 @@ ROOT = Path(__file__).resolve().parent
 
 # Helper
 
+
 def ensure(path: Path, content: str = ""):
     if path.exists():
         return
@@ -17,10 +19,15 @@ def ensure(path: Path, content: str = ""):
     path.write_text(content, encoding="utf-8")
     print("[CREATE]", path.relative_to(ROOT))
 
-# Root-level files
-ensure(ROOT / "README.md", """# SHEILY-light\n\nLocal AI node with FastAPI backend, React/Vite frontend, and Ollama Llama3 integration.\n""")
 
-docker_compose_prod = textwrap.dedent("""
+# Root-level files
+ensure(
+    ROOT / "README.md",
+    """# SHEILY-light\n\nLocal AI node with FastAPI backend, React/Vite frontend, and Ollama Llama3 integration.\n""",
+)
+
+docker_compose_prod = textwrap.dedent(
+    """
 version: '3.9'
 services:
   api:
@@ -54,7 +61,8 @@ services:
 volumes:
   pgdata:
   ollama_data:
-""")
+"""
+)
 ensure(ROOT / "docker-compose.prod.yml", docker_compose_prod)
 
 ensure(ROOT / ".env.example", "API_SECRET=changeme\nDATABASE_URL=postgresql://user:pass@db:5432/sheily\n")
@@ -85,13 +93,21 @@ for test in [
     ensure(ROOT / "sheily_tests" / test, "def test_placeholder():\n    assert True\n")
 
 # scripts
-ensure(ROOT / "scripts/deploy.sh", "#!/usr/bin/env bash\nset -e\ndocker-compose -f docker-compose.prod.yml up -d --build\n")
-ensure(ROOT / "scripts/init_project.sh", "#!/usr/bin/env bash\npython -m venv .venv && source .venv/bin/activate && pip install -r apps/sheily_light_api/requirements.txt\n")
+ensure(
+    ROOT / "scripts/deploy.sh", "#!/usr/bin/env bash\nset -e\ndocker-compose -f docker-compose.prod.yml up -d --build\n"
+)
+ensure(
+    ROOT / "scripts/init_project.sh",
+    "#!/usr/bin/env bash\npython -m venv .venv && source .venv/bin/activate && pip install -r apps/sheily_light_api/requirements.txt\n",
+)
 
 # Backend core
 api_root = ROOT / "apps" / "sheily_light_api"
 ensure(api_root / "__init__.py", "")
-ensure(api_root / "sheily_main_api.py", textwrap.dedent("""
+ensure(
+    api_root / "sheily_main_api.py",
+    textwrap.dedent(
+        """
 from fastapi import FastAPI
 from .sheily_routers import (
     sheily_auth_router,
@@ -120,16 +136,24 @@ for r in routers:
 @app.get("/")
 async def root():
     return {"message": "SHEILY-light API running"}
-"""))
+"""
+    ),
+)
 
 core_dir = api_root / "core"
 ensure(core_dir / "__init__.py", "")
 ensure(core_dir / "config.py", "SECRET_KEY = 'changeme'\n")
-ensure(core_dir / "database.py", "from sqlalchemy import create_engine\nengine = create_engine('sqlite:///sheily.db', echo=False)\n")
-ensure(core_dir / "logging_config.py", "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO)\n")
+ensure(
+    core_dir / "database.py",
+    "from sqlalchemy import create_engine\nengine = create_engine('sqlite:///sheily.db', echo=False)\n",
+)
+ensure(
+    core_dir / "logging_config.py", "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO)\n"
+)
 
 # Routers
-backup_router_code = textwrap.dedent("""
+backup_router_code = textwrap.dedent(
+    """
 from fastapi import APIRouter
 
 router = APIRouter(prefix="/backup", tags=["backup"])
@@ -141,7 +165,8 @@ async def create_backup():
 @router.post("/restore")
 async def restore_backup():
     return {"detail": "backup restored"}
-""")
+"""
+)
 ensure(api_root / "sheily_routers" / "sheily_backup_router.py", backup_router_code)
 
 # Helper to create stub module files

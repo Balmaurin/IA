@@ -263,9 +263,7 @@ class Node(abc.ABC, metaclass=NodeMeta):
         """
         # enforce type checks here to avoid getting a generic type error later otherwise.
         if not isinstance(warning, Warning):
-            raise ValueError(
-                f"warning must be an instance of Warning or subclass, got {warning!r}"
-            )
+            raise ValueError(f"warning must be an instance of Warning or subclass, got {warning!r}")
         path, lineno = get_fslocation_from_item(self)
         assert lineno is not None
         warnings.warn_explicit(
@@ -343,9 +341,7 @@ class Node(abc.ABC, metaclass=NodeMeta):
         """
         return (x[1] for x in self.iter_markers_with_node(name=name))
 
-    def iter_markers_with_node(
-        self, name: str | None = None
-    ) -> Iterator[tuple[Node, Mark]]:
+    def iter_markers_with_node(self, name: str | None = None) -> Iterator[tuple[Node, Mark]]:
         """Iterate over all markers of the node.
 
         :param name: If given, filter the results by the name attribute.
@@ -512,16 +508,12 @@ class Collector(Node, abc.ABC):
         raise NotImplementedError("abstract")
 
     # TODO: This omits the style= parameter which breaks Liskov Substitution.
-    def repr_failure(  # type: ignore[override]
-        self, excinfo: ExceptionInfo[BaseException]
-    ) -> str | TerminalRepr:
+    def repr_failure(self, excinfo: ExceptionInfo[BaseException]) -> str | TerminalRepr:  # type: ignore[override]
         """Return a representation of a collection failure.
 
         :param excinfo: Exception information for the failure.
         """
-        if isinstance(excinfo.value, self.CollectError) and not self.config.getoption(
-            "fulltrace", False
-        ):
+        if isinstance(excinfo.value, self.CollectError) and not self.config.getoption("fulltrace", False):
             exc = excinfo.value
             return str(exc.args[0])
 
@@ -544,9 +536,7 @@ class Collector(Node, abc.ABC):
 
 
 @lru_cache(maxsize=1000)
-def _check_initialpaths_for_relpath(
-    initial_paths: frozenset[Path], path: Path
-) -> str | None:
+def _check_initialpaths_for_relpath(initial_paths: frozenset[Path], path: Path) -> str | None:
     if path in initial_paths:
         return ""
 
@@ -705,9 +695,7 @@ class Item(Node, abc.ABC):
             return
         setattr(cls, attr_name, True)
 
-        problems = ", ".join(
-            base.__name__ for base in cls.__bases__ if issubclass(base, Collector)
-        )
+        problems = ", ".join(base.__name__ for base in cls.__bases__ if issubclass(base, Collector))
         if problems:
             warnings.warn(
                 f"{cls.__name__} is an Item subclass and should not be a collector, "

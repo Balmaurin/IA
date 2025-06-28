@@ -3,14 +3,14 @@ from pydantic import BaseModel
 
 from sheily_light_api.dependencies import get_current_user
 from sheily_light_api.models import User
-from sheily_light_api.sheily_modules.sheily_auth_module \
-    .sheily_user_manager import (
-        register_user,
-        login_user,
-        logout_user
-    )
+from sheily_light_api.sheily_modules.sheily_auth_module.sheily_user_manager import (
+    register_user,
+    login_user,
+    logout_user,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
 
 class Credentials(BaseModel):
     username: str
@@ -30,4 +30,3 @@ def login(creds: Credentials):
 @router.post("/logout")
 def logout(user: User = Depends(get_current_user)):
     return logout_user({"user": user.username})
-

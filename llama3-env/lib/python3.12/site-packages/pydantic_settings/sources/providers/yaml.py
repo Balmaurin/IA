@@ -26,7 +26,7 @@ def import_yaml() -> None:
     try:
         import yaml
     except ImportError as e:
-        raise ImportError('PyYAML is not installed, run `pip install pydantic-settings[yaml]`') from e
+        raise ImportError("PyYAML is not installed, run `pip install pydantic-settings[yaml]`") from e
 
 
 class YamlConfigSettingsSource(InitSettingsSource, ConfigFileSourceMixin):
@@ -41,16 +41,16 @@ class YamlConfigSettingsSource(InitSettingsSource, ConfigFileSourceMixin):
         yaml_file_encoding: str | None = None,
         yaml_config_section: str | None = None,
     ):
-        self.yaml_file_path = yaml_file if yaml_file != DEFAULT_PATH else settings_cls.model_config.get('yaml_file')
+        self.yaml_file_path = yaml_file if yaml_file != DEFAULT_PATH else settings_cls.model_config.get("yaml_file")
         self.yaml_file_encoding = (
             yaml_file_encoding
             if yaml_file_encoding is not None
-            else settings_cls.model_config.get('yaml_file_encoding')
+            else settings_cls.model_config.get("yaml_file_encoding")
         )
         self.yaml_config_section = (
             yaml_config_section
             if yaml_config_section is not None
-            else settings_cls.model_config.get('yaml_config_section')
+            else settings_cls.model_config.get("yaml_config_section")
         )
         self.yaml_data = self._read_files(self.yaml_file_path)
 
@@ -69,7 +69,7 @@ class YamlConfigSettingsSource(InitSettingsSource, ConfigFileSourceMixin):
             return yaml.safe_load(yaml_file) or {}
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(yaml_file={self.yaml_file_path})'
+        return f"{self.__class__.__name__}(yaml_file={self.yaml_file_path})"
 
 
-__all__ = ['YamlConfigSettingsSource']
+__all__ = ["YamlConfigSettingsSource"]

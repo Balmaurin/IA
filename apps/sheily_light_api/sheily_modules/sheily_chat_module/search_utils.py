@@ -1,4 +1,5 @@
 """Utilities for detecting when a prompt needs fresh web data and retrieving it via SerpAPI."""
+
 from __future__ import annotations
 
 import os

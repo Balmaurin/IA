@@ -1,0 +1,45 @@
+[flake8]
+max-line-length = 120
+# Ignorar errores específicos (sin comentarios en línea)
+extend-ignore = E203, W503, E402, F401
+
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .venv,
+    venv,
+    .mypy_cache,
+    .pytest_cache,
+    .vscode,
+    .idea,
+    node_modules,
+    migrations
+
+# Configuración por archivo
+per-file-ignores =
+    __init__.py: F401
+    */tests/*.py: F401,F403,F405,F811
+    */scripts/*.py: F401,F403,F405
+
+# Mostrar el código fuente en los informes
+doctests = False
+# Número de espacios por nivel de indentación
+indent-size = 4
+# Mostrar el nombre del archivo para cada error
+filename = *.py
+# Contar el número total de errores
+count = False
+# Mostrar estadísticas de errores
+statistics = False
+# No mostrar códigos de error
+no-show-source = False
+# Mostrar códigos de error
+show-source = True
+# Mostrar el código fuente del error
+show-pep8 = False
+# Ignorar errores específicos
+ignore = E203, W503, E402, F401
+# Mostrar el código fuente del error
+verbose = 1

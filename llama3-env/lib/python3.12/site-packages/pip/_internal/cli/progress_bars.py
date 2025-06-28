@@ -79,9 +79,7 @@ def _raw_progress_bar(
         yield chunk
 
 
-def get_download_progress_renderer(
-    *, bar_type: str, size: Optional[int] = None
-) -> DownloadProgressRenderer:
+def get_download_progress_renderer(*, bar_type: str, size: Optional[int] = None) -> DownloadProgressRenderer:
     """Get an object that can be used to render the download progress.
 
     Returns a callable, that takes an iterable to "wrap".

@@ -40,10 +40,7 @@ def format_command_args(args: Union[List[str], CommandArgs]) -> str:
     # this can trigger a UnicodeDecodeError in Python 2 if the argument
     # has type unicode and includes a non-ascii character.  (The type
     # checker doesn't ensure the annotations are correct in all cases.)
-    return " ".join(
-        shlex.quote(str(arg)) if isinstance(arg, HiddenText) else shlex.quote(arg)
-        for arg in args
-    )
+    return " ".join(shlex.quote(str(arg)) if isinstance(arg, HiddenText) else shlex.quote(arg) for arg in args)
 
 
 def reveal_command_args(args: Union[List[str], CommandArgs]) -> List[str]:

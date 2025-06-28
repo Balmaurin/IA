@@ -39,8 +39,7 @@ def pytest_addoption(parser: Parser) -> None:
 
     parser.addini(
         "xfail_strict",
-        "Default for the strict parameter of xfail "
-        "markers when not given explicitly (default: False)",
+        "Default for the strict parameter of xfail " "markers when not given explicitly (default: False)",
         default=False,
         type="bool",
     )
@@ -102,13 +101,9 @@ def evaluate_condition(item: Item, mark: Mark, condition: object) -> tuple[bool,
             "platform": platform,
             "config": item.config,
         }
-        for dictionary in reversed(
-            item.ihook.pytest_markeval_namespace(config=item.config)
-        ):
+        for dictionary in reversed(item.ihook.pytest_markeval_namespace(config=item.config)):
             if not isinstance(dictionary, Mapping):
-                raise ValueError(
-                    f"pytest_markeval_namespace() needs to return a dict, got {dictionary!r}"
-                )
+                raise ValueError(f"pytest_markeval_namespace() needs to return a dict, got {dictionary!r}")
             globals_.update(dictionary)
         if hasattr(item, "obj"):
             globals_.update(item.obj.__globals__)
@@ -202,12 +197,7 @@ class Xfail:
     reason: str
     run: bool
     strict: bool
-    raises: (
-        type[BaseException]
-        | tuple[type[BaseException], ...]
-        | AbstractRaises[BaseException]
-        | None
-    )
+    raises: type[BaseException] | tuple[type[BaseException], ...] | AbstractRaises[BaseException] | None
 
 
 def evaluate_xfail_marks(item: Item) -> Xfail | None:
@@ -269,9 +259,7 @@ def pytest_runtest_call(item: Item) -> Generator[None]:
 
 
 @hookimpl(wrapper=True)
-def pytest_runtest_makereport(
-    item: Item, call: CallInfo[None]
-) -> Generator[None, TestReport, TestReport]:
+def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> Generator[None, TestReport, TestReport]:
     rep = yield
     xfailed = item.stash.get(xfailed_key, None)
     if item.config.option.runxfail:
@@ -284,14 +272,8 @@ def pytest_runtest_makereport(
         if call.excinfo:
             raises = xfailed.raises
             if raises is None or (
-                (
-                    isinstance(raises, (type, tuple))
-                    and isinstance(call.excinfo.value, raises)
-                )
-                or (
-                    isinstance(raises, AbstractRaises)
-                    and raises.matches(call.excinfo.value)
-                )
+                (isinstance(raises, (type, tuple)) and isinstance(call.excinfo.value, raises))
+                or (isinstance(raises, AbstractRaises) and raises.matches(call.excinfo.value))
             ):
                 rep.outcome = "skipped"
                 rep.wasxfail = xfailed.reason

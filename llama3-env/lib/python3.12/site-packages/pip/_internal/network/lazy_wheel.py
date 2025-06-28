@@ -46,9 +46,7 @@ class LazyZipOverHTTP:
     during initialization.
     """
 
-    def __init__(
-        self, url: str, session: PipSession, chunk_size: int = CONTENT_CHUNK_SIZE
-    ) -> None:
+    def __init__(self, url: str, session: PipSession, chunk_size: int = CONTENT_CHUNK_SIZE) -> None:
         head = session.head(url, headers=HEADERS)
         raise_for_status(head)
         assert head.status_code == 200
@@ -165,9 +163,7 @@ class LazyZipOverHTTP:
                 else:
                     break
 
-    def _stream_response(
-        self, start: int, end: int, base_headers: Dict[str, str] = HEADERS
-    ) -> Response:
+    def _stream_response(self, start: int, end: int, base_headers: Dict[str, str] = HEADERS) -> Response:
         """Return HTTP response to a range request from start to end."""
         headers = base_headers.copy()
         headers["Range"] = f"bytes={start}-{end}"
@@ -175,9 +171,7 @@ class LazyZipOverHTTP:
         headers["Cache-Control"] = "no-cache"
         return self._session.get(self._url, headers=headers, stream=True)
 
-    def _merge(
-        self, start: int, end: int, left: int, right: int
-    ) -> Generator[Tuple[int, int], None, None]:
+    def _merge(self, start: int, end: int, left: int, right: int) -> Generator[Tuple[int, int], None, None]:
         """Return a generator of intervals to be fetched.
 
         Args:

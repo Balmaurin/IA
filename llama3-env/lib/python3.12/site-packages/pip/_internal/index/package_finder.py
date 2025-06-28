@@ -271,8 +271,7 @@ def filter_unallowed_hashes(
     """
     if not hashes:
         logger.debug(
-            "Given no hashes to check %s links for project %r: "
-            "discarding no candidates",
+            "Given no hashes to check %s links for project %r: " "discarding no candidates",
             len(candidates),
             project_name,
         )
@@ -310,8 +309,7 @@ def filter_unallowed_hashes(
         )
 
     logger.debug(
-        "Checked %s links for project %r against %s hashes "
-        "(%s matches, %s no digest): %s",
+        "Checked %s links for project %r against %s hashes " "(%s matches, %s no digest): %s",
         len(candidates),
         project_name,
         hashes.digest_count,
@@ -438,9 +436,7 @@ class CandidateEvaluator:
         # Since the index of the tag in the _supported_tags list is used
         # as a priority, precompute a map from tag to index/priority to be
         # used in wheel.find_most_preferred_tag.
-        self._wheel_tag_preferences = {
-            tag: idx for idx, tag in enumerate(supported_tags)
-        }
+        self._wheel_tag_preferences = {tag: idx for idx, tag in enumerate(supported_tags)}
 
     def get_applicable_candidates(
         self,
@@ -516,15 +512,10 @@ class CandidateEvaluator:
             # can raise InvalidWheelFilename
             wheel = Wheel(link.filename)
             try:
-                pri = -(
-                    wheel.find_most_preferred_tag(
-                        valid_tags, self._wheel_tag_preferences
-                    )
-                )
+                pri = -(wheel.find_most_preferred_tag(valid_tags, self._wheel_tag_preferences))
             except ValueError:
                 raise UnsupportedWheel(
-                    f"{wheel.filename} is not a supported wheel for this platform. It "
-                    "can't be sorted."
+                    f"{wheel.filename} is not a supported wheel for this platform. It " "can't be sorted."
                 )
             if self._prefer_binary:
                 binary_preference = 1
@@ -695,11 +686,7 @@ class PackageFinder:
         self._candidate_prefs.prefer_binary = True
 
     def requires_python_skipped_reasons(self) -> List[str]:
-        reasons = {
-            detail
-            for _, result, detail in self._logged_links
-            if result == LinkType.requires_python_mismatch
-        }
+        reasons = {detail for _, result, detail in self._logged_links if result == LinkType.requires_python_mismatch}
         return sorted(reasons)
 
     def make_link_evaluator(self, project_name: str) -> LinkEvaluator:
@@ -739,9 +726,7 @@ class PackageFinder:
             logger.debug("Skipping link: %s: %s", detail, link)
             self._logged_links.add(entry)
 
-    def get_install_candidate(
-        self, link_evaluator: LinkEvaluator, link: Link
-    ) -> Optional[InstallationCandidate]:
+    def get_install_candidate(self, link_evaluator: LinkEvaluator, link: Link) -> Optional[InstallationCandidate]:
         """
         If the link is a candidate for install, convert it to an
         InstallationCandidate and return it. Otherwise, return None.
@@ -760,9 +745,7 @@ class PackageFinder:
         except InvalidVersion:
             return None
 
-    def evaluate_links(
-        self, link_evaluator: LinkEvaluator, links: Iterable[Link]
-    ) -> List[InstallationCandidate]:
+    def evaluate_links(self, link_evaluator: LinkEvaluator, links: Iterable[Link]) -> List[InstallationCandidate]:
         """
         Convert links that are candidates to InstallationCandidate objects.
         """
@@ -774,9 +757,7 @@ class PackageFinder:
 
         return candidates
 
-    def process_project_url(
-        self, project_url: Link, link_evaluator: LinkEvaluator
-    ) -> List[InstallationCandidate]:
+    def process_project_url(self, project_url: Link, link_evaluator: LinkEvaluator) -> List[InstallationCandidate]:
         logger.debug(
             "Fetching project page and analyzing links: %s",
             project_url,
@@ -816,18 +797,12 @@ class PackageFinder:
         )
 
         page_candidates_it = itertools.chain.from_iterable(
-            source.page_candidates()
-            for sources in collected_sources
-            for source in sources
-            if source is not None
+            source.page_candidates() for sources in collected_sources for source in sources if source is not None
         )
         page_candidates = list(page_candidates_it)
 
         file_links_it = itertools.chain.from_iterable(
-            source.file_links()
-            for sources in collected_sources
-            for source in sources
-            if source is not None
+            source.file_links() for sources in collected_sources for source in sources if source is not None
         )
         file_candidates = self.evaluate_links(
             link_evaluator,
@@ -888,9 +863,7 @@ class PackageFinder:
         )
         return candidate_evaluator.compute_best_candidate(candidates)
 
-    def find_requirement(
-        self, req: InstallRequirement, upgrade: bool
-    ) -> Optional[InstallationCandidate]:
+    def find_requirement(self, req: InstallRequirement, upgrade: bool) -> Optional[InstallationCandidate]:
         """Try to find a Link matching req
 
         Expects req, an InstallRequirement and upgrade, a boolean
@@ -926,8 +899,7 @@ class PackageFinder:
 
         if installed_version is None and best_candidate is None:
             logger.critical(
-                "Could not find a version that satisfies the requirement %s "
-                "(from versions: %s)",
+                "Could not find a version that satisfies the requirement %s " "(from versions: %s)",
                 req,
                 _format_versions(best_candidate_result.iter_all()),
             )
@@ -946,15 +918,13 @@ class PackageFinder:
         if not upgrade and installed_version is not None:
             if _should_install_candidate(best_candidate):
                 logger.debug(
-                    "Existing installed version (%s) satisfies requirement "
-                    "(most up-to-date version is %s)",
+                    "Existing installed version (%s) satisfies requirement " "(most up-to-date version is %s)",
                     installed_version,
                     best_candidate.version,
                 )
             else:
                 logger.debug(
-                    "Existing installed version (%s) is most up-to-date and "
-                    "satisfies requirement",
+                    "Existing installed version (%s) is most up-to-date and " "satisfies requirement",
                     installed_version,
                 )
             return None

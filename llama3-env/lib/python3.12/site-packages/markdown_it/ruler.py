@@ -15,6 +15,7 @@ You will not need use this class directly until write plugins. For simple
 rules control use [[MarkdownIt.disable]], [[MarkdownIt.enable]] and
 [[MarkdownIt.use]].
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -108,9 +109,7 @@ class Ruler(Generic[RuleFuncTv]):
                     continue
                 self.__cache__[chain].append(rule.fn)
 
-    def at(
-        self, ruleName: str, fn: RuleFuncTv, options: RuleOptionsType | None = None
-    ) -> None:
+    def at(self, ruleName: str, fn: RuleFuncTv, options: RuleOptionsType | None = None) -> None:
         """Replace rule by name with new function & options.
 
         :param ruleName: rule name to replace.
@@ -145,9 +144,7 @@ class Ruler(Generic[RuleFuncTv]):
         options = options or {}
         if index == -1:
             raise KeyError(f"Parser rule not found: {beforeName}")
-        self.__rules__.insert(
-            index, Rule[RuleFuncTv](ruleName, True, fn, options.get("alt", []))
-        )
+        self.__rules__.insert(index, Rule[RuleFuncTv](ruleName, True, fn, options.get("alt", [])))
         self.__cache__ = None
 
     def after(
@@ -169,14 +166,10 @@ class Ruler(Generic[RuleFuncTv]):
         options = options or {}
         if index == -1:
             raise KeyError(f"Parser rule not found: {afterName}")
-        self.__rules__.insert(
-            index + 1, Rule[RuleFuncTv](ruleName, True, fn, options.get("alt", []))
-        )
+        self.__rules__.insert(index + 1, Rule[RuleFuncTv](ruleName, True, fn, options.get("alt", [])))
         self.__cache__ = None
 
-    def push(
-        self, ruleName: str, fn: RuleFuncTv, options: RuleOptionsType | None = None
-    ) -> None:
+    def push(self, ruleName: str, fn: RuleFuncTv, options: RuleOptionsType | None = None) -> None:
         """Push new rule to the end of chain.
 
         :param ruleName: new rule will be added to the end of chain.
@@ -184,14 +177,10 @@ class Ruler(Generic[RuleFuncTv]):
         :param options: new rule options (not mandatory).
 
         """
-        self.__rules__.append(
-            Rule[RuleFuncTv](ruleName, True, fn, (options or {}).get("alt", []))
-        )
+        self.__rules__.append(Rule[RuleFuncTv](ruleName, True, fn, (options or {}).get("alt", [])))
         self.__cache__ = None
 
-    def enable(
-        self, names: str | Iterable[str], ignoreInvalid: bool = False
-    ) -> list[str]:
+    def enable(self, names: str | Iterable[str], ignoreInvalid: bool = False) -> list[str]:
         """Enable rules with given names.
 
         :param names: name or list of rule names to enable.
@@ -213,9 +202,7 @@ class Ruler(Generic[RuleFuncTv]):
         self.__cache__ = None
         return result
 
-    def enableOnly(
-        self, names: str | Iterable[str], ignoreInvalid: bool = False
-    ) -> list[str]:
+    def enableOnly(self, names: str | Iterable[str], ignoreInvalid: bool = False) -> list[str]:
         """Enable rules with given names, and disable everything else.
 
         :param names: name or list of rule names to enable.
@@ -229,9 +216,7 @@ class Ruler(Generic[RuleFuncTv]):
             rule.enabled = False
         return self.enable(names, ignoreInvalid)
 
-    def disable(
-        self, names: str | Iterable[str], ignoreInvalid: bool = False
-    ) -> list[str]:
+    def disable(self, names: str | Iterable[str], ignoreInvalid: bool = False) -> list[str]:
         """Disable rules with given names.
 
         :param names: name or list of rule names to enable.

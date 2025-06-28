@@ -41,9 +41,7 @@ Scanned = namedtuple("Scanned", ["can_open", "can_close", "length"])
 
 
 class StateInline(StateBase):
-    def __init__(
-        self, src: str, md: MarkdownIt, env: EnvType, outTokens: list[Token]
-    ) -> None:
+    def __init__(self, src: str, md: MarkdownIt, env: EnvType, outTokens: list[Token]) -> None:
         self.src = src
         self.env = env
         self.md = md
@@ -75,10 +73,7 @@ class StateInline(StateBase):
         self.linkLevel = 0
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}"
-            f"(pos=[{self.pos} of {self.posMax}], token={len(self.tokens)})"
-        )
+        return f"{self.__class__.__name__}" f"(pos=[{self.pos} of {self.posMax}], token={len(self.tokens)})"
 
     def pushPending(self) -> Token:
         token = Token("text", "", 0)
@@ -147,14 +142,8 @@ class StateInline(StateBase):
         isLastWhiteSpace = isWhiteSpace(ord(lastChar))
         isNextWhiteSpace = isWhiteSpace(ord(nextChar))
 
-        left_flanking = not (
-            isNextWhiteSpace
-            or (isNextPunctChar and not (isLastWhiteSpace or isLastPunctChar))
-        )
-        right_flanking = not (
-            isLastWhiteSpace
-            or (isLastPunctChar and not (isNextWhiteSpace or isNextPunctChar))
-        )
+        left_flanking = not (isNextWhiteSpace or (isNextPunctChar and not (isLastWhiteSpace or isLastPunctChar)))
+        right_flanking = not (isLastWhiteSpace or (isLastPunctChar and not (isNextWhiteSpace or isNextPunctChar)))
 
         if not canSplitWord:
             can_open = left_flanking and ((not right_flanking) or isLastPunctChar)

@@ -320,20 +320,9 @@ def varnames(func: object) -> tuple[tuple[str, ...], tuple[str, ...]]:
         inspect.Parameter.POSITIONAL_ONLY,
         inspect.Parameter.POSITIONAL_OR_KEYWORD,
     )
-    _valid_params = {
-        name: param
-        for name, param in sig.parameters.items()
-        if param.kind in _valid_param_kinds
-    }
+    _valid_params = {name: param for name, param in sig.parameters.items() if param.kind in _valid_param_kinds}
     args = tuple(_valid_params)
-    defaults = (
-        tuple(
-            param.default
-            for param in _valid_params.values()
-            if param.default is not param.empty
-        )
-        or None
-    )
+    defaults = tuple(param.default for param in _valid_params.values() if param.default is not param.empty) or None
 
     if defaults:
         index = -len(defaults)
@@ -426,8 +415,7 @@ class HookCaller:
     ) -> None:
         if self.spec is not None:
             raise ValueError(
-                f"Hook {self.spec.name!r} is already registered "
-                f"within namespace {self.spec.namespace}"
+                f"Hook {self.spec.name!r} is already registered " f"within namespace {self.spec.namespace}"
             )
         self.spec = HookSpec(specmodule_or_class, self.name, spec_opts)
         if spec_opts.get("historic"):
@@ -503,9 +491,7 @@ class HookCaller:
         Returns the result(s) of calling all registered plugins, see
         :ref:`calling`.
         """
-        assert not self.is_historic(), (
-            "Cannot directly call a historic hook - use call_historic instead."
-        )
+        assert not self.is_historic(), "Cannot directly call a historic hook - use call_historic instead."
         self._verify_all_args_are_provided(kwargs)
         firstresult = self.spec.opts.get("firstresult", False) if self.spec else False
         # Copy because plugins may register other plugins during iteration (#438).
@@ -538,15 +524,11 @@ class HookCaller:
             for x in res:
                 result_callback(x)
 
-    def call_extra(
-        self, methods: Sequence[Callable[..., object]], kwargs: Mapping[str, object]
-    ) -> Any:
+    def call_extra(self, methods: Sequence[Callable[..., object]], kwargs: Mapping[str, object]) -> Any:
         """Call the hook with some additional temporarily participating
         methods using the specified ``kwargs`` as call parameters, see
         :ref:`call_extra`."""
-        assert not self.is_historic(), (
-            "Cannot directly call a historic hook - use call_historic instead."
-        )
+        assert not self.is_historic(), "Cannot directly call a historic hook - use call_historic instead."
         self._verify_all_args_are_provided(kwargs)
         opts: HookimplOpts = {
             "wrapper": False,
@@ -615,11 +597,7 @@ class _SubsetHookCaller(HookCaller):
 
     @property  # type: ignore[misc]
     def _hookimpls(self) -> list[HookImpl]:
-        return [
-            impl
-            for impl in self._orig._hookimpls
-            if impl.plugin not in self._remove_plugins
-        ]
+        return [impl for impl in self._orig._hookimpls if impl.plugin not in self._remove_plugins]
 
     @property
     def spec(self) -> HookSpec | None:  # type: ignore[override]

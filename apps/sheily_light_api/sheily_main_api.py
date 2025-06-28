@@ -1,13 +1,13 @@
 # SHEILY-light Main API Entry Point
 from fastapi import FastAPI
-from sheily_light_api.sheily_routers.sheily_auth_router import router as auth_router
-from sheily_light_api.sheily_routers.sheily_chat_router import router as chat_router
-from sheily_light_api.sheily_routers.sheily_tokens_router import router as tokens_router
-from sheily_light_api.sheily_routers.sheily_export_router import router as export_router
-from sheily_light_api.sheily_routers.sheily_reward_router import router as reward_router
-from sheily_light_api.sheily_routers.sheily_tasks_router import router as tasks_router
-from sheily_light_api.sheily_routers.sheily_status_router import router as status_router
-from sheily_light_api.sheily_routers.sheily_config_router import router as config_router
+from sheily_routers.sheily_auth_router import router as auth_router
+from sheily_routers.sheily_chat_router import router as chat_router
+from sheily_routers.sheily_tokens_router import router as tokens_router
+from sheily_routers.sheily_export_router import router as export_router
+from sheily_routers.sheily_reward_router import router as reward_router
+from sheily_routers.sheily_tasks_router import router as tasks_router
+from sheily_routers.sheily_status_router import router as status_router
+from sheily_routers.sheily_config_router import router as config_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -37,7 +37,9 @@ app.include_router(tasks_router, prefix="/api/tasks", tags=["tasks"])
 app.include_router(status_router, prefix="/api/status", tags=["status"])
 app.include_router(config_router, prefix="/api/config", tags=["config"])
 from sheily_light_api.sheily_routers.sheily_utils_router import router as utils_router
+
 app.include_router(utils_router, prefix="/api", tags=["utils"])
+
 
 @app.get("/")
 def root():

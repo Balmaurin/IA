@@ -74,9 +74,7 @@ def pytest_addoption(parser: Parser) -> None:
         type="args",
         default=["ELLIPSIS"],
     )
-    parser.addini(
-        "doctest_encoding", "Encoding used for doctest files", default="utf-8"
-    )
+    parser.addini("doctest_encoding", "Encoding used for doctest files", default="utf-8")
     group = parser.getgroup("collect")
     group.addoption(
         "--doctest-modules",
@@ -129,9 +127,7 @@ def pytest_collect_file(
 ) -> DoctestModule | DoctestTextfile | None:
     config = parent.config
     if file_path.suffix == ".py":
-        if config.option.doctestmodules and not any(
-            (_is_setup_py(file_path), _is_main_py(file_path))
-        ):
+        if config.option.doctestmodules and not any((_is_setup_py(file_path), _is_main_py(file_path))):
             return DoctestModule.from_parent(parent, path=file_path)
     elif _is_doctest(config, file_path, parent):
         return DoctestTextfile.from_parent(parent, path=file_path)
@@ -157,9 +153,7 @@ def _is_main_py(path: Path) -> bool:
 
 
 class ReprFailDoctest(TerminalRepr):
-    def __init__(
-        self, reprlocation_lines: Sequence[tuple[ReprFileLocation, Sequence[str]]]
-    ) -> None:
+    def __init__(self, reprlocation_lines: Sequence[tuple[ReprFileLocation, Sequence[str]]]) -> None:
         self.reprlocation_lines = reprlocation_lines
 
     def toterminal(self, tw: TerminalWriter) -> None:
@@ -320,12 +314,8 @@ class DoctestItem(Item):
     ) -> str | TerminalRepr:
         import doctest
 
-        failures: (
-            Sequence[doctest.DocTestFailure | doctest.UnexpectedException] | None
-        ) = None
-        if isinstance(
-            excinfo.value, (doctest.DocTestFailure, doctest.UnexpectedException)
-        ):
+        failures: Sequence[doctest.DocTestFailure | doctest.UnexpectedException] | None = None
+        if isinstance(excinfo.value, (doctest.DocTestFailure, doctest.UnexpectedException)):
             failures = [excinfo.value]
         elif isinstance(excinfo.value, MultipleDoctestFailures):
             failures = excinfo.value.failures
@@ -352,29 +342,21 @@ class DoctestItem(Item):
                 lines = failure.test.docstring.splitlines(False)
                 # add line numbers to the left of the error message
                 assert test.lineno is not None
-                lines = [
-                    f"{i + test.lineno + 1:03d} {x}" for (i, x) in enumerate(lines)
-                ]
+                lines = [f"{i + test.lineno + 1:03d} {x}" for (i, x) in enumerate(lines)]
                 # trim docstring error lines to 10
                 lines = lines[max(example.lineno - 9, 0) : example.lineno + 1]
             else:
-                lines = [
-                    "EXAMPLE LOCATION UNKNOWN, not showing all tests of that example"
-                ]
+                lines = ["EXAMPLE LOCATION UNKNOWN, not showing all tests of that example"]
                 indent = ">>>"
                 for line in example.source.splitlines():
                     lines.append(f"??? {indent} {line}")
                     indent = "..."
             if isinstance(failure, doctest.DocTestFailure):
-                lines += checker.output_difference(
-                    example, failure.got, report_choice
-                ).split("\n")
+                lines += checker.output_difference(example, failure.got, report_choice).split("\n")
             else:
                 inner_excinfo = ExceptionInfo.from_exc_info(failure.exc_info)
                 lines += [f"UNEXPECTED EXCEPTION: {inner_excinfo.value!r}"]
-                lines += [
-                    x.strip("\n") for x in traceback.format_exception(*failure.exc_info)
-                ]
+                lines += [x.strip("\n") for x in traceback.format_exception(*failure.exc_info)]
             reprlocation_lines.append((reprlocation, lines))
         return ReprFailDoctest(reprlocation_lines)
 
@@ -443,9 +425,7 @@ class DoctestTextfile(Module):
         parser = doctest.DocTestParser()
         test = parser.get_doctest(text, globs, name, filename, 0)
         if test.examples:
-            yield DoctestItem.from_parent(
-                self, name=test.name, runner=runner, dtest=test
-            )
+            yield DoctestItem.from_parent(self, name=test.name, runner=runner, dtest=test)
 
 
 def _check_all_skipped(test: doctest.DocTest) -> None:
@@ -461,10 +441,7 @@ def _check_all_skipped(test: doctest.DocTest) -> None:
 def _is_mocked(obj: object) -> bool:
     """Return if an object is possibly a mock object by checking the
     existence of a highly improbable attribute."""
-    return (
-        safe_getattr(obj, "pytest_mock_example_attribute_that_shouldnt_exist", None)
-        is not None
-    )
+    return safe_getattr(obj, "pytest_mock_example_attribute_that_shouldnt_exist", None) is not None
 
 
 @contextmanager
@@ -473,9 +450,7 @@ def _patch_unwrap_mock_aware() -> Generator[None]:
     that's aware of mock objects and doesn't recurse into them."""
     real_unwrap = inspect.unwrap
 
-    def _mock_aware_unwrap(
-        func: Callable[..., Any], *, stop: Callable[[Any], Any] | None = None
-    ) -> Any:
+    def _mock_aware_unwrap(func: Callable[..., Any], *, stop: Callable[[Any], Any] | None = None) -> Any:
         try:
             if stop is None or stop is _is_mocked:
                 return real_unwrap(func, stop=_is_mocked)
@@ -532,9 +507,7 @@ class DoctestModule(Module):
 
             if sys.version_info < (3, 10):
 
-                def _find(
-                    self, tests, obj, name, module, source_lines, globs, seen
-                ) -> None:
+                def _find(self, tests, obj, name, module, source_lines, globs, seen) -> None:
                     """Override _find to work around issue in stdlib.
 
                     https://github.com/pytest-dev/pytest/issues/3456
@@ -586,9 +559,7 @@ class DoctestModule(Module):
 
         for test in finder.find(module, module.__name__):
             if test.examples:  # skip empty doctests
-                yield DoctestItem.from_parent(
-                    self, name=test.name, runner=runner, dtest=test
-                )
+                yield DoctestItem.from_parent(self, name=test.name, runner=runner, dtest=test)
 
 
 def _init_checker_class() -> type[doctest.OutputChecker]:
@@ -669,9 +640,7 @@ def _init_checker_class() -> type[doctest.OutputChecker]:
                     # They're close enough. Replace the text we actually
                     # got with the text we want, so that it will match when we
                     # check the string literally.
-                    got = (
-                        got[: g.start() + offset] + w.group() + got[g.end() + offset :]
-                    )
+                    got = got[: g.start() + offset] + w.group() + got[g.end() + offset :]
                     offset += w.end() - w.start() - (g.end() - g.start())
             return got
 

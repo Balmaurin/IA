@@ -121,9 +121,7 @@ class ClientProtocol(Protocol):
                 ]
             )
         if self.available_subprotocols is not None:
-            headers["Sec-WebSocket-Protocol"] = build_subprotocol(
-                self.available_subprotocols
-            )
+            headers["Sec-WebSocket-Protocol"] = build_subprotocol(self.available_subprotocols)
         return Request(self.uri.resource_name, headers)
 
     def process_response(self, response: Response) -> None:
@@ -147,13 +145,9 @@ class ClientProtocol(Protocol):
             [parse_connection(value) for value in headers.get_all("Connection")], []
         )
         if not any(value.lower() == "upgrade" for value in connection):
-            raise InvalidUpgrade(
-                "Connection", ", ".join(connection) if connection else None
-            )
+            raise InvalidUpgrade("Connection", ", ".join(connection) if connection else None)
 
-        upgrade: list[UpgradeProtocol] = sum(
-            [parse_upgrade(value) for value in headers.get_all("Upgrade")], []
-        )
+        upgrade: list[UpgradeProtocol] = sum([parse_upgrade(value) for value in headers.get_all("Upgrade")], [])
         # For compatibility with non-strict implementations, ignore case when
         # checking the Upgrade header. It's supposed to be 'WebSocket'.
         if not (len(upgrade) == 1 and upgrade[0].lower() == "websocket"):
@@ -222,9 +216,7 @@ class ClientProtocol(Protocol):
 
                     # Skip non-matching extensions based on their params.
                     try:
-                        extension = extension_factory.process_response_params(
-                            response_params, accepted_extensions
-                        )
+                        extension = extension_factory.process_response_params(response_params, accepted_extensions)
                     except NegotiationError:
                         continue
 
@@ -237,10 +229,7 @@ class ClientProtocol(Protocol):
                 # If we didn't break from the loop, no extension in our list
                 # matched what the server sent. Fail the connection.
                 else:
-                    raise NegotiationError(
-                        f"Unsupported extension: "
-                        f"name = {name}, params = {response_params}"
-                    )
+                    raise NegotiationError(f"Unsupported extension: " f"name = {name}, params = {response_params}")
 
         return accepted_extensions
 
@@ -304,9 +293,7 @@ class ClientProtocol(Protocol):
                     self.reader.read_to_eof,
                 )
             except Exception as exc:
-                self.handshake_exc = InvalidMessage(
-                    "did not receive a valid HTTP response"
-                )
+                self.handshake_exc = InvalidMessage("did not receive a valid HTTP response")
                 self.handshake_exc.__cause__ = exc
                 self.send_eof()
                 self.parser = self.discard()

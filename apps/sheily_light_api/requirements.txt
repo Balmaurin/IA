@@ -5,7 +5,7 @@ python-jose==3.3.0
 passlib[bcrypt]==1.7.4
 cryptography==41.0.3
 requests
-httpx==2.31.0
+httpx==0.28.1
 SQLAlchemy==2.0.19
 psycopg2-binary==2.9.7
 python-dotenv==1.0.0
@@ -13,3 +13,4 @@ aiofiles==23.2.1
 psutil==5.9.8
 PyYAML==6.0.1
 APScheduler==3.10.4
+aiohttp>=3.9.0  # Para la funcionalidad de fetch

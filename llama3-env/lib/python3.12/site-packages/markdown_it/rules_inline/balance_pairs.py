@@ -1,4 +1,5 @@
 """Balance paired characters (*, _, etc) in inline tokens."""
+
 from __future__ import annotations
 
 from .state_inline import Delimiter, StateInline
@@ -26,10 +27,7 @@ def processDelimiters(state: StateInline, delimiters: list[Delimiter]) -> None:
         #  - they have adjacent tokens
         #  - AND markers are the same
         #
-        if (
-            delimiters[headerIdx].marker != closer.marker
-            or lastTokenIdx != closer.token - 1
-        ):
+        if delimiters[headerIdx].marker != closer.marker or lastTokenIdx != closer.token - 1:
             headerIdx = closerIdx
         lastTokenIdx = closer.token
 
@@ -50,9 +48,7 @@ def processDelimiters(state: StateInline, delimiters: list[Delimiter]) -> None:
         if closer.marker not in openersBottom:
             openersBottom[closer.marker] = [-1, -1, -1, -1, -1, -1]
 
-        minOpenerIdx = openersBottom[closer.marker][
-            (3 if closer.open else 0) + (closer.length % 3)
-        ]
+        minOpenerIdx = openersBottom[closer.marker][(3 if closer.open else 0) + (closer.length % 3)]
 
         openerIdx = headerIdx - jumps[headerIdx] - 1
 
@@ -116,9 +112,7 @@ def processDelimiters(state: StateInline, delimiters: list[Delimiter]) -> None:
             # See details here:
             # https:#github.com/commonmark/cmark/issues/178#issuecomment-270417442
             #
-            openersBottom[closer.marker][
-                (3 if closer.open else 0) + ((closer.length or 0) % 3)
-            ] = newMinOpenerIdx
+            openersBottom[closer.marker][(3 if closer.open else 0) + ((closer.length or 0) % 3)] = newMinOpenerIdx
 
         closerIdx += 1
 

@@ -1,2 +1,2 @@
 def placeholder():
-    return 'sheily_config_manager.py works'
+    return "sheily_config_manager.py works"

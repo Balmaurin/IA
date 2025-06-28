@@ -61,9 +61,7 @@ class _SocketProvider(TypedAttributeProvider):
 
         attributes: dict[Any, Callable[[], Any]] = {
             SocketAttribute.family: lambda: self._raw_socket.family,
-            SocketAttribute.local_address: lambda: convert(
-                self._raw_socket.getsockname()
-            ),
+            SocketAttribute.local_address: lambda: convert(self._raw_socket.getsockname()),
             SocketAttribute.raw_socket: lambda: self._raw_socket,
         }
         try:
@@ -77,9 +75,7 @@ class _SocketProvider(TypedAttributeProvider):
 
         # Provide local and remote ports for IP based sockets
         if self._raw_socket.family in (AddressFamily.AF_INET, AddressFamily.AF_INET6):
-            attributes[SocketAttribute.local_port] = (
-                lambda: self._raw_socket.getsockname()[1]
-            )
+            attributes[SocketAttribute.local_port] = lambda: self._raw_socket.getsockname()[1]
             if peername is not None:
                 remote_port = peername[1]
                 attributes[SocketAttribute.remote_port] = lambda: remote_port
@@ -172,9 +168,7 @@ class ConnectedUDPSocket(UnreliableObjectStream[bytes], _SocketProvider):
     """
 
 
-class UNIXDatagramSocket(
-    UnreliableObjectStream[UNIXDatagramPacketType], _SocketProvider
-):
+class UNIXDatagramSocket(UnreliableObjectStream[UNIXDatagramPacketType], _SocketProvider):
     """
     Represents an unconnected Unix datagram socket.
 

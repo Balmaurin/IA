@@ -226,9 +226,7 @@ class DontReadFromInput(TextIO):
         return sys.__stdin__.encoding
 
     def read(self, size: int = -1) -> str:
-        raise OSError(
-            "pytest: reading from stdin while output is captured!  Consider using `-s`."
-        )
+        raise OSError("pytest: reading from stdin while output is captured!  Consider using `-s`.")
 
     readline = read
 
@@ -236,9 +234,7 @@ class DontReadFromInput(TextIO):
         return self.readline()
 
     def readlines(self, hint: int | None = -1) -> list[str]:
-        raise OSError(
-            "pytest: reading from stdin while output is captured!  Consider using `-s`."
-        )
+        raise OSError("pytest: reading from stdin while output is captured!  Consider using `-s`.")
 
     def __iter__(self) -> Iterator[str]:
         return self
@@ -360,9 +356,7 @@ class NoCapture(CaptureBase[str]):
 
 
 class SysCaptureBase(CaptureBase[AnyStr]):
-    def __init__(
-        self, fd: int, tmpfile: TextIO | None = None, *, tee: bool = False
-    ) -> None:
+    def __init__(self, fd: int, tmpfile: TextIO | None = None, *, tee: bool = False) -> None:
         name = patchsysdict[fd]
         self._old: TextIO = getattr(sys, name)
         self.name = name
@@ -393,10 +387,8 @@ class SysCaptureBase(CaptureBase[AnyStr]):
         )
 
     def _assert_state(self, op: str, states: tuple[str, ...]) -> None:
-        assert self._state in states, (
-            "cannot {} in state {!r}: expected one of {}".format(
-                op, self._state, ", ".join(states)
-            )
+        assert self._state in states, "cannot {} in state {!r}: expected one of {}".format(
+            op, self._state, ", ".join(states)
         )
 
     def start(self) -> None:
@@ -510,10 +502,8 @@ class FDCaptureBase(CaptureBase[AnyStr]):
         )
 
     def _assert_state(self, op: str, states: tuple[str, ...]) -> None:
-        assert self._state in states, (
-            "cannot {} in state {!r}: expected one of {}".format(
-                op, self._state, ", ".join(states)
-            )
+        assert self._state in states, "cannot {} in state {!r}: expected one of {}".format(
+            op, self._state, ", ".join(states)
         )
 
     def start(self) -> None:
@@ -717,9 +707,7 @@ def _get_multicapture(method: _CaptureMethod) -> MultiCapture[str]:
     elif method == "no":
         return MultiCapture(in_=None, out=None, err=None)
     elif method == "tee-sys":
-        return MultiCapture(
-            in_=None, out=SysCapture(1, tee=True), err=SysCapture(2, tee=True)
-        )
+        return MultiCapture(in_=None, out=SysCapture(1, tee=True), err=SysCapture(2, tee=True))
     raise ValueError(f"unknown capturing method: {method!r}")
 
 
@@ -808,9 +796,7 @@ class CaptureManager:
         if self._capture_fixture:
             current_fixture = self._capture_fixture.request.fixturename
             requested_fixture = capture_fixture.request.fixturename
-            capture_fixture.request.raiseerror(
-                f"cannot use {requested_fixture} and {current_fixture} at the same time"
-            )
+            capture_fixture.request.raiseerror(f"cannot use {requested_fixture} and {current_fixture} at the same time")
         self._capture_fixture = capture_fixture
 
     def unset_fixture(self) -> None:
@@ -871,9 +857,7 @@ class CaptureManager:
     # Hooks
 
     @hookimpl(wrapper=True)
-    def pytest_make_collect_report(
-        self, collector: Collector
-    ) -> Generator[None, CollectReport, CollectReport]:
+    def pytest_make_collect_report(self, collector: Collector) -> Generator[None, CollectReport, CollectReport]:
         if isinstance(collector, File):
             self.resume_global_capture()
             try:
@@ -986,9 +970,7 @@ class CaptureFixture(Generic[AnyStr]):
     @contextlib.contextmanager
     def disabled(self) -> Generator[None]:
         """Temporarily disable capturing while inside the ``with`` block."""
-        capmanager: CaptureManager = self.request.config.pluginmanager.getplugin(
-            "capturemanager"
-        )
+        capmanager: CaptureManager = self.request.config.pluginmanager.getplugin("capturemanager")
         with capmanager.global_and_fixture_disabled():
             yield
 
@@ -1049,9 +1031,7 @@ def capteesys(request: SubRequest) -> Generator[CaptureFixture[str]]:
             assert captured.out == "hello\n"
     """
     capman: CaptureManager = request.config.pluginmanager.getplugin("capturemanager")
-    capture_fixture = CaptureFixture(
-        SysCapture, request, config=dict(tee=True), _ispytest=True
-    )
+    capture_fixture = CaptureFixture(SysCapture, request, config=dict(tee=True), _ispytest=True)
     capman.set_fixture(capture_fixture)
     capture_fixture._start()
     yield capture_fixture

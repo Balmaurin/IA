@@ -125,13 +125,9 @@ def load_extensions(
 
 def _environment_config_check(environment: _env_bound) -> _env_bound:
     """Perform a sanity check on the environment."""
-    assert issubclass(
-        environment.undefined, Undefined
-    ), "'undefined' must be a subclass of 'jinja2.Undefined'."
+    assert issubclass(environment.undefined, Undefined), "'undefined' must be a subclass of 'jinja2.Undefined'."
     assert (
-        environment.block_start_string
-        != environment.variable_start_string
-        != environment.comment_start_string
+        environment.block_start_string != environment.variable_start_string != environment.comment_start_string
     ), "block, variable and comment start strings must be different."
     assert environment.newline_sequence in {
         "\r",
@@ -463,9 +459,7 @@ class Environment:
         """Iterates over the extensions by priority."""
         return iter(sorted(self.extensions.values(), key=lambda x: x.priority))
 
-    def getitem(
-        self, obj: t.Any, argument: t.Union[str, t.Any]
-    ) -> t.Union[t.Any, Undefined]:
+    def getitem(self, obj: t.Any, argument: t.Union[str, t.Any]) -> t.Union[t.Any, Undefined]:
         """Get an item or attribute of an object but prefer the item."""
         try:
             return obj[argument]
@@ -531,9 +525,7 @@ class Environment:
 
         if pass_arg is _PassArg.context:
             if context is None:
-                raise TemplateRuntimeError(
-                    f"Attempted to invoke a context {type_name} without context."
-                )
+                raise TemplateRuntimeError(f"Attempted to invoke a context {type_name} without context.")
 
             args.insert(0, context)
         elif pass_arg is _PassArg.eval_context:
@@ -566,9 +558,7 @@ class Environment:
 
         .. versionadded:: 2.7
         """
-        return self._filter_test_common(
-            name, value, args, kwargs, context, eval_ctx, True
-        )
+        return self._filter_test_common(name, value, args, kwargs, context, eval_ctx, True)
 
     def call_test(
         self,
@@ -591,9 +581,7 @@ class Environment:
 
         .. versionadded:: 2.7
         """
-        return self._filter_test_common(
-            name, value, args, kwargs, context, eval_ctx, False
-        )
+        return self._filter_test_common(name, value, args, kwargs, context, eval_ctx, False)
 
     @internalcode
     def parse(
@@ -615,9 +603,7 @@ class Environment:
         except TemplateSyntaxError:
             self.handle_exception(source=source)
 
-    def _parse(
-        self, source: str, name: t.Optional[str], filename: t.Optional[str]
-    ) -> nodes.Template:
+    def _parse(self, source: str, name: t.Optional[str], filename: t.Optional[str]) -> nodes.Template:
         """Internal parsing function used by `parse` and `compile`."""
         return Parser(self, source, name, filename).parse()
 
@@ -770,9 +756,7 @@ class Environment:
         except TemplateSyntaxError:
             self.handle_exception(source=source_hint)
 
-    def compile_expression(
-        self, source: str, undefined_to_none: bool = True
-    ) -> "TemplateExpression":
+    def compile_expression(self, source: str, undefined_to_none: bool = True) -> "TemplateExpression":
         """A handy helper method that returns a callable that accepts keyword
         arguments that appear as variables in the expression.  If called it
         returns the result of the expression.
@@ -804,9 +788,7 @@ class Environment:
         try:
             expr = parser.parse_expression()
             if not parser.stream.eos:
-                raise TemplateSyntaxError(
-                    "chunk after expression", parser.stream.current.lineno, None, None
-                )
+                raise TemplateSyntaxError("chunk after expression", parser.stream.current.lineno, None, None)
             expr.set_environment(self)
         except TemplateSyntaxError:
             self.handle_exception(source=source)
@@ -866,9 +848,7 @@ class Environment:
             from zipfile import ZipFile
             from zipfile import ZipInfo
 
-            zip_file = ZipFile(
-                target, "w", dict(deflated=ZIP_DEFLATED, stored=ZIP_STORED)[zip]
-            )
+            zip_file = ZipFile(target, "w", dict(deflated=ZIP_DEFLATED, stored=ZIP_STORED)[zip])
             log_function(f"Compiling into Zip archive {target!r}")
         else:
             if not os.path.isdir(target):
@@ -921,9 +901,7 @@ class Environment:
 
         if extensions is not None:
             if filter_func is not None:
-                raise TypeError(
-                    "either extensions or filter_func can be passed, but not both"
-                )
+                raise TypeError("either extensions or filter_func can be passed, but not both")
 
             def filter_func(x: str) -> bool:
                 return "." in x and x.rsplit(".", 1)[1] in extensions
@@ -954,17 +932,13 @@ class Environment:
         return template
 
     @internalcode
-    def _load_template(
-        self, name: str, globals: t.Optional[t.MutableMapping[str, t.Any]]
-    ) -> "Template":
+    def _load_template(self, name: str, globals: t.Optional[t.MutableMapping[str, t.Any]]) -> "Template":
         if self.loader is None:
             raise TypeError("no loader for this environment specified")
         cache_key = (weakref.ref(self.loader), name)
         if self.cache is not None:
             template = self.cache.get(cache_key)
-            if template is not None and (
-                not self.auto_reload or template.is_up_to_date
-            ):
+            if template is not None and (not self.auto_reload or template.is_up_to_date):
                 # template.globals is a ChainMap, modifying it will only
                 # affect the template, not the environment globals.
                 if globals:
@@ -1054,9 +1028,7 @@ class Environment:
             names._fail_with_undefined_error()
 
         if not names:
-            raise TemplatesNotFound(
-                message="Tried to select from an empty list of templates."
-            )
+            raise TemplatesNotFound(message="Tried to select from an empty list of templates.")
 
         for name in names:
             if isinstance(name, Template):
@@ -1072,9 +1044,7 @@ class Environment:
     @internalcode
     def get_or_select_template(
         self,
-        template_name_or_list: t.Union[
-            str, "Template", t.List[t.Union[str, "Template"]]
-        ],
+        template_name_or_list: t.Union[str, "Template", t.List[t.Union[str, "Template"]]],
         parent: t.Optional[str] = None,
         globals: t.Optional[t.MutableMapping[str, t.Any]] = None,
     ) -> "Template":
@@ -1110,9 +1080,7 @@ class Environment:
         cls = template_class or self.template_class
         return cls.from_code(self, self.compile(source), gs, None)
 
-    def make_globals(
-        self, d: t.Optional[t.MutableMapping[str, t.Any]]
-    ) -> t.MutableMapping[str, t.Any]:
+    def make_globals(self, d: t.Optional[t.MutableMapping[str, t.Any]]) -> t.MutableMapping[str, t.Any]:
         """Make the globals map for a template. Any given template
         globals overlay the environment :attr:`globals`.
 
@@ -1304,9 +1272,7 @@ class Template:
             await template.render_async(knights='that say nih; asynchronously')
         """
         if not self.environment.is_async:
-            raise RuntimeError(
-                "The environment was not created with async mode enabled."
-            )
+            raise RuntimeError("The environment was not created with async mode enabled.")
 
         ctx = self.new_context(dict(*args, **kwargs))
 
@@ -1347,16 +1313,12 @@ class Template:
         except Exception:
             yield self.environment.handle_exception()
 
-    async def generate_async(
-        self, *args: t.Any, **kwargs: t.Any
-    ) -> t.AsyncGenerator[str, object]:
+    async def generate_async(self, *args: t.Any, **kwargs: t.Any) -> t.AsyncGenerator[str, object]:
         """An async version of :meth:`generate`.  Works very similarly but
         returns an async iterator instead.
         """
         if not self.environment.is_async:
-            raise RuntimeError(
-                "The environment was not created with async mode enabled."
-            )
+            raise RuntimeError("The environment was not created with async mode enabled.")
 
         ctx = self.new_context(dict(*args, **kwargs))
 
@@ -1385,9 +1347,7 @@ class Template:
 
         `locals` can be a dict of local variables for internal usage.
         """
-        return new_context(
-            self.environment, self.name, self.blocks, vars, shared, self.globals, locals
-        )
+        return new_context(self.environment, self.name, self.blocks, vars, shared, self.globals, locals)
 
     def make_module(
         self,
@@ -1449,9 +1409,7 @@ class Template:
 
         return self._module
 
-    async def _get_default_module_async(
-        self, ctx: t.Optional[Context] = None
-    ) -> "TemplateModule":
+    async def _get_default_module_async(self, ctx: t.Optional[Context] = None) -> "TemplateModule":
         if ctx is not None:
             keys = ctx.globals_keys - self.globals.keys()
 
@@ -1499,10 +1457,7 @@ class Template:
     def debug_info(self) -> t.List[t.Tuple[int, int]]:
         """The debug info mapping."""
         if self._debug_info:
-            return [
-                tuple(map(int, x.split("=")))  # type: ignore
-                for x in self._debug_info.split("&")
-            ]
+            return [tuple(map(int, x.split("="))) for x in self._debug_info.split("&")]  # type: ignore
 
         return []
 

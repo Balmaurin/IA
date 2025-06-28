@@ -2,6 +2,7 @@ import requests
 
 CENTRAL_URL = "https://sheily-central.example.com/api"
 
+
 def sync_user(user: str, data: dict) -> dict:
     try:
         r = requests.post(f"{CENTRAL_URL}/users/sync", json={"user": user, "data": data}, timeout=10)
@@ -9,6 +10,7 @@ def sync_user(user: str, data: dict) -> dict:
         return r.json()
     except Exception as e:
         return {"error": str(e)}
+
 
 def sync_tokens(user: str, tokens: int) -> dict:
     try:

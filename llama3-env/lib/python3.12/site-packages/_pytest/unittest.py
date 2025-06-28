@@ -49,9 +49,7 @@ _SysExcInfoType = Union[
 ]
 
 
-def pytest_pycollect_makeitem(
-    collector: Module | Class, name: str, obj: object
-) -> UnitTestCase | None:
+def pytest_pycollect_makeitem(collector: Module | Class, name: str, obj: object) -> UnitTestCase | None:
     try:
         # Has unittest been imported?
         ut = sys.modules["unittest"]
@@ -233,9 +231,7 @@ class TestCaseFunction(Function):
     def _addexcinfo(self, rawexcinfo: _SysExcInfoType) -> None:
         rawexcinfo = _handle_twisted_exc_info(rawexcinfo)
         try:
-            excinfo = _pytest._code.ExceptionInfo[BaseException].from_exc_info(
-                rawexcinfo  # type: ignore[arg-type]
-            )
+            excinfo = _pytest._code.ExceptionInfo[BaseException].from_exc_info(rawexcinfo)  # type: ignore[arg-type]
             # Invoke the attributes to trigger storing the traceback
             # trial causes some issue there.
             _ = excinfo.value
@@ -246,16 +242,14 @@ class TestCaseFunction(Function):
                     values = traceback.format_exception(*rawexcinfo)
                     values.insert(
                         0,
-                        "NOTE: Incompatible Exception Representation, "
-                        "displaying natively:\n\n",
+                        "NOTE: Incompatible Exception Representation, " "displaying natively:\n\n",
                     )
                     fail("".join(values), pytrace=False)
                 except (fail.Exception, KeyboardInterrupt):
                     raise
                 except BaseException:
                     fail(
-                        "ERROR: Unknown Incompatible Exception "
-                        f"representation:\n{rawexcinfo!r}",
+                        "ERROR: Unknown Incompatible Exception " f"representation:\n{rawexcinfo!r}",
                         pytrace=False,
                     )
             except KeyboardInterrupt:
@@ -264,9 +258,7 @@ class TestCaseFunction(Function):
                 excinfo = _pytest._code.ExceptionInfo.from_current()
         self.__dict__.setdefault("_excinfo", []).append(excinfo)
 
-    def addError(
-        self, testcase: unittest.TestCase, rawexcinfo: _SysExcInfoType
-    ) -> None:
+    def addError(self, testcase: unittest.TestCase, rawexcinfo: _SysExcInfoType) -> None:
         try:
             if isinstance(rawexcinfo[1], exit.Exception):
                 exit(rawexcinfo[1].msg)
@@ -274,9 +266,7 @@ class TestCaseFunction(Function):
             pass
         self._addexcinfo(rawexcinfo)
 
-    def addFailure(
-        self, testcase: unittest.TestCase, rawexcinfo: _SysExcInfoType
-    ) -> None:
+    def addFailure(self, testcase: unittest.TestCase, rawexcinfo: _SysExcInfoType) -> None:
         self._addexcinfo(rawexcinfo)
 
     def addSkip(self, testcase: unittest.TestCase, reason: str) -> None:
@@ -352,9 +342,7 @@ class TestCaseFunction(Function):
             finally:
                 delattr(testcase, self.name)
 
-    def _traceback_filter(
-        self, excinfo: _pytest._code.ExceptionInfo[BaseException]
-    ) -> _pytest._code.Traceback:
+    def _traceback_filter(self, excinfo: _pytest._code.ExceptionInfo[BaseException]) -> _pytest._code.Traceback:
         traceback = super()._traceback_filter(excinfo)
         ntraceback = traceback.filter(
             lambda x: not x.frame.f_globals.get("__unittest"),
@@ -381,9 +369,7 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
     unittest = sys.modules.get("unittest")
     if unittest and call.excinfo and isinstance(call.excinfo.value, unittest.SkipTest):
         excinfo = call.excinfo
-        call2 = CallInfo[None].from_call(
-            lambda: pytest.skip(str(excinfo.value)), call.when
-        )
+        call2 = CallInfo[None].from_call(lambda: pytest.skip(str(excinfo.value)), call.when)
         call.excinfo = call2.excinfo
 
 
@@ -462,9 +448,7 @@ def pytest_runtest_protocol(item: Item) -> Iterator[None]:
                 raw_exc_info = (exc_type, exc_value, exc_tb)
             setattr(self, TWISTED_RAW_EXCINFO_ATTR, tuple(raw_exc_info))
             try:
-                original__init__(
-                    self, exc_value, exc_type, exc_tb, captureVars=captureVars
-                )
+                original__init__(self, exc_value, exc_type, exc_tb, captureVars=captureVars)
             except TypeError:  # pragma: no cover
                 original__init__(self, exc_value, exc_type, exc_tb)
 

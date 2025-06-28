@@ -308,9 +308,7 @@ def _handle_get_simple_fail(
     meth("Could not fetch URL %s: %s - skipping", link, reason)
 
 
-def _make_index_content(
-    response: Response, cache_link_parsing: bool = True
-) -> IndexContent:
+def _make_index_content(response: Response, cache_link_parsing: bool = True) -> IndexContent:
     encoding = _get_encoding_from_headers(response.headers)
     return IndexContent(
         response.content,
@@ -352,8 +350,7 @@ def _get_index_content(link: Link, *, session: PipSession) -> Optional["IndexCon
         resp = _get_simple_response(url, session=session)
     except _NotHTTP:
         logger.warning(
-            "Skipping page %s because it looks like an archive, and cannot "
-            "be checked by a HTTP HEAD request.",
+            "Skipping page %s because it looks like an archive, and cannot " "be checked by a HTTP HEAD request.",
             link,
         )
     except _NotAPIContent as exc:
@@ -482,10 +479,7 @@ class LinkCollector:
                 for s in itertools.chain(find_links_sources, index_url_sources)
                 if s is not None and s.link is not None
             ]
-            lines = [
-                f"{len(lines)} location(s) to search "
-                f"for versions of {project_name}:"
-            ] + lines
+            lines = [f"{len(lines)} location(s) to search " f"for versions of {project_name}:"] + lines
             logger.debug("\n".join(lines))
 
         return CollectedSources(

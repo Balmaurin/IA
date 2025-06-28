@@ -1,0 +1,102 @@
+version: '3.9'
+
+services:
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.5.0
+    hostname: wazuh-manager
+    restart: always
+    environment:
+      - INDEXER_URL=https://wazuh-indexer:9200
+      - API_USERNAME=wazuh
+      - API_PASSWORD=${WAZUH_API_PASSWORD:-ChangeMe!123}
+      - CLUSTER_DISCOVERY_SERVICE=wazuh-cluster
+      - CLUSTER_KEY=${WAZUH_CLUSTER_KEY:-ChangeMe!123}
+    volumes:
+      - wazuh_etc:/var/ossec/etc
+      - wazuh_queue:/var/ossec/queue
+      - wazuh_var_multigroups:/var/ossec/var/multigroups
+      - wazuh_integrations:/var/ossec/integrations
+      - wazuh_active_response:/var/ossec/active-response
+      - wazuh_agentless:/var/ossec/agentless
+      - wazuh_wodles:/var/ossec/wodles
+      - wazuh_logs:/var/ossec/logs
+    networks:
+      - wazuh
+    ports:
+      - "1514:1514/udp"
+      - "1515:1515/tcp"
+      - "1516:1516/tcp"
+    healthcheck:
+      test: ["CMD", "curl", "-k", "https://localhost:55000/manager/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 300s
+
+  wazuh-indexer:
+    image: wazuh/wazuh-indexer:4.5.0
+    hostname: wazuh-indexer
+    restart: always
+    environment:
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD:-ChangeMe!123}
+      - OPENSEARCH_JAVA_HEAP_SIZE=1g
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - wazuh_indexer_data:/var/lib/wazuh-indexer
+      - wazuh_indexer_config:/usr/share/wazuh-indexer/config
+    networks:
+      - wazuh
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD", "curl", "-k", "https://localhost:9200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 300s
+
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:4.5.0
+    hostname: wazuh-dashboard
+    restart: always
+    environment:
+      - OPENSEARCH_HOSTS=["https://wazuh-indexer:9200"]
+      - OPENSEARCH_USERNAME=admin
+      - OPENSEARCH_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD:-ChangeMe!123}
+      - DASHBOARD_HOSTNAME=wazuh-dashboard
+    volumes:
+      - wazuh_dashboard_data:/var/lib/wazuh-dashboard
+      - wazuh_dashboard_config:/etc/wazuh-dashboard
+    networks:
+      - wazuh
+    ports:
+      - "5601:5601"
+    depends_on:
+      - wazuh-indexer
+    healthcheck:
+      test: ["CMD", "curl", "-k", "https://localhost:5601"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 300s
+
+networks:
+  wazuh:
+    driver: bridge
+
+volumes:
+  wazuh_etc:
+  wazuh_queue:
+  wazuh_var_multigroups:
+  wazuh_integrations:
+  wazuh_active_response:
+  wazuh_agentless:
+  wazuh_wodles:
+  wazuh_logs:
+  wazuh_indexer_data:
+  wazuh_indexer_config:
+  wazuh_dashboard_data:
+  wazuh_dashboard_config:

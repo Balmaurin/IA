@@ -66,9 +66,7 @@ class Cache:
     # Sub-directory under cache-dir for values created by `set()`.
     _CACHE_PREFIX_VALUES = "v"
 
-    def __init__(
-        self, cachedir: Path, config: Config, *, _ispytest: bool = False
-    ) -> None:
+    def __init__(self, cachedir: Path, config: Config, *, _ispytest: bool = False) -> None:
         check_ispytest(_ispytest)
         self._cachedir = cachedir
         self._config = config
@@ -252,9 +250,7 @@ class LFPluginCollWrapper:
         self._collected_at_least_one_failure = False
 
     @hookimpl(wrapper=True)
-    def pytest_make_collect_report(
-        self, collector: nodes.Collector
-    ) -> Generator[None, CollectReport, CollectReport]:
+    def pytest_make_collect_report(self, collector: nodes.Collector) -> Generator[None, CollectReport, CollectReport]:
         res = yield
         if isinstance(collector, (Session, Directory)):
             # Sort any lf-paths to the beginning.
@@ -303,16 +299,12 @@ class LFPluginCollSkipfiles:
         self.lfplugin = lfplugin
 
     @hookimpl
-    def pytest_make_collect_report(
-        self, collector: nodes.Collector
-    ) -> CollectReport | None:
+    def pytest_make_collect_report(self, collector: nodes.Collector) -> CollectReport | None:
         if isinstance(collector, File):
             if collector.path not in self.lfplugin._last_failed_paths:
                 self.lfplugin._skipped_files += 1
 
-                return CollectReport(
-                    collector.nodeid, "passed", longrepr=None, result=[]
-                )
+                return CollectReport(collector.nodeid, "passed", longrepr=None, result=[])
         return None
 
 
@@ -331,9 +323,7 @@ class LFPlugin:
 
         if config.getoption("lf"):
             self._last_failed_paths = self.get_last_failed_paths()
-            config.pluginmanager.register(
-                LFPluginCollWrapper(self), "lfplugin-collwrapper"
-            )
+            config.pluginmanager.register(LFPluginCollWrapper(self), "lfplugin-collwrapper")
 
     def get_last_failed_paths(self) -> set[Path]:
         """Return a set with all Paths of the previously failed nodeids and
@@ -367,9 +357,7 @@ class LFPlugin:
             self.lastfailed[report.nodeid] = True
 
     @hookimpl(wrapper=True, tryfirst=True)
-    def pytest_collection_modifyitems(
-        self, config: Config, items: list[nodes.Item]
-    ) -> Generator[None]:
+    def pytest_collection_modifyitems(self, config: Config, items: list[nodes.Item]) -> Generator[None]:
         res = yield
 
         if not self.active:
@@ -388,9 +376,7 @@ class LFPlugin:
             if not previously_failed:
                 # Running a subset of all tests with recorded failures
                 # only outside of it.
-                self._report_status = (
-                    f"{len(self.lastfailed)} known failures not in selected tests"
-                )
+                self._report_status = f"{len(self.lastfailed)} known failures not in selected tests"
             else:
                 if self.config.getoption("lf"):
                     items[:] = previously_failed
@@ -400,9 +386,7 @@ class LFPlugin:
 
                 noun = "failure" if self._previously_failed_count == 1 else "failures"
                 suffix = " first" if self.config.getoption("failedfirst") else ""
-                self._report_status = (
-                    f"rerun previous {self._previously_failed_count} {noun}{suffix}"
-                )
+                self._report_status = f"rerun previous {self._previously_failed_count} {noun}{suffix}"
 
             if self._skipped_files > 0:
                 files_noun = "file" if self._skipped_files == 1 else "files"
@@ -451,9 +435,7 @@ class NFPlugin:
                 else:
                     other_items[item.nodeid] = item
 
-            items[:] = self._get_increasing_order(
-                new_items.values()
-            ) + self._get_increasing_order(other_items.values())
+            items[:] = self._get_increasing_order(new_items.values()) + self._get_increasing_order(other_items.values())
             self.cached_nodeids.update(new_items)
         else:
             self.cached_nodeids.update(item.nodeid for item in items)
@@ -498,18 +480,14 @@ def pytest_addoption(parser: Parser) -> None:
         "--new-first",
         action="store_true",
         dest="newfirst",
-        help="Run tests from new files first, then the rest of the tests "
-        "sorted by file mtime",
+        help="Run tests from new files first, then the rest of the tests " "sorted by file mtime",
     )
     group.addoption(
         "--cache-show",
         action="append",
         nargs="?",
         dest="cacheshow",
-        help=(
-            "Show cache contents, don't perform collection or tests. "
-            "Optional argument: glob (default: '*')."
-        ),
+        help=("Show cache contents, don't perform collection or tests. " "Optional argument: glob (default: '*')."),
     )
     group.addoption(
         "--cache-clear",

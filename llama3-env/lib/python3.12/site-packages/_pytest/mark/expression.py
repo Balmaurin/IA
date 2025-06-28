@@ -142,9 +142,7 @@ class Scanner:
     def accept(self, type: TokenType, *, reject: Literal[True]) -> Token: ...
 
     @overload
-    def accept(
-        self, type: TokenType, *, reject: Literal[False] = False
-    ) -> Token | None: ...
+    def accept(self, type: TokenType, *, reject: Literal[False] = False) -> Token | None: ...
 
     def accept(self, type: TokenType, *, reject: bool = False) -> Token | None:
         if self.current.type is type:
@@ -238,9 +236,7 @@ def single_kwarg(s: Scanner) -> ast.keyword:
         value: str | int | bool | None = value_token.value[1:-1]  # strip quotes
     else:
         value_token = s.accept(TokenType.IDENT, reject=True)
-        if (number := value_token.value).isdigit() or (
-            number.startswith("-") and number[1:].isdigit()
-        ):
+        if (number := value_token.value).isdigit() or (number.startswith("-") and number[1:].isdigit()):
             value = int(number)
         elif value_token.value in BUILTIN_MATCHERS:
             value = BUILTIN_MATCHERS[value_token.value]

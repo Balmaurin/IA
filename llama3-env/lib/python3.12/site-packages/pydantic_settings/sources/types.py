@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from pydantic._internal._dataclasses import PydanticDataclass
     from pydantic.main import BaseModel
 
-    PydanticModel = TypeVar('PydanticModel', bound=Union[PydanticDataclass, BaseModel])
+    PydanticModel = TypeVar("PydanticModel", bound=Union[PydanticDataclass, BaseModel])
 else:
     PydanticModel = Any
 
@@ -33,12 +33,12 @@ class ForceDecode:
 
 DotenvType = Union[Path, str, Sequence[Union[Path, str]]]
 PathType = Union[Path, str, Sequence[Union[Path, str]]]
-DEFAULT_PATH: PathType = Path('')
+DEFAULT_PATH: PathType = Path("")
 
 # This is used as default value for `_env_file` in the `BaseSettings` class and
 # `env_file` in `DotEnvSettingsSource` so the default can be distinguished from `None`.
 # See the docstring of `BaseSettings` for more details.
-ENV_FILE_SENTINEL: DotenvType = Path('')
+ENV_FILE_SENTINEL: DotenvType = Path("")
 
 
 class _CliSubCommand:
@@ -62,17 +62,17 @@ class _CliUnknownArgs:
 
 
 __all__ = [
-    'DEFAULT_PATH',
-    'ENV_FILE_SENTINEL',
-    'DotenvType',
-    'EnvNoneType',
-    'ForceDecode',
-    'NoDecode',
-    'PathType',
-    'PydanticModel',
-    '_CliExplicitFlag',
-    '_CliImplicitFlag',
-    '_CliPositionalArg',
-    '_CliSubCommand',
-    '_CliUnknownArgs',
+    "DEFAULT_PATH",
+    "ENV_FILE_SENTINEL",
+    "DotenvType",
+    "EnvNoneType",
+    "ForceDecode",
+    "NoDecode",
+    "PathType",
+    "PydanticModel",
+    "_CliExplicitFlag",
+    "_CliImplicitFlag",
+    "_CliPositionalArg",
+    "_CliSubCommand",
+    "_CliUnknownArgs",
 ]

@@ -3,6 +3,7 @@ from sheily_modules.sheily_monitoring_module.sheily_node_status_monitor import g
 
 router = APIRouter()
 
+
 @router.get("")
 def status():
     return get_node_status()

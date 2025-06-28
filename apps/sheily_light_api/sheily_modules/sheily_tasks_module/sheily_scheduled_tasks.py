@@ -22,6 +22,7 @@ if not scheduler.running:
 # Job helpers
 # ---------------------------------------------------------------------------
 
+
 def schedule_system_scan(user: str, interval_seconds: int = 3600) -> str:
     """Schedule a periodic system scan job. Returns job id."""
     job_id = f"system_scan_{user}_{interval_seconds}"
@@ -57,15 +58,16 @@ def remove_job(job_id: str):
 def list_jobs() -> List[Dict[str, Any]]:
     jobs = []
     for job in scheduler.get_jobs():
-        jobs.append({
-            "id": job.id,
-            "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
-            "trigger": str(job.trigger),
-        })
+        jobs.append(
+            {
+                "id": job.id,
+                "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
+                "trigger": str(job.trigger),
+            }
+        )
     return jobs
 
 
 def shutdown_scheduler():
     if scheduler.running:
         scheduler.shutdown(wait=False)
-

@@ -92,16 +92,10 @@ class SearchScope:
 
                 redacted_index_urls.append(redacted_index_url)
 
-            lines.append(
-                "Looking in indexes: {}".format(", ".join(redacted_index_urls))
-            )
+            lines.append("Looking in indexes: {}".format(", ".join(redacted_index_urls)))
 
         if self.find_links:
-            lines.append(
-                "Looking in links: {}".format(
-                    ", ".join(redact_auth_from_url(url) for url in self.find_links)
-                )
-            )
+            lines.append("Looking in links: {}".format(", ".join(redact_auth_from_url(url) for url in self.find_links)))
         return "\n".join(lines)
 
     def get_index_urls_locations(self, project_name: str) -> List[str]:
@@ -112,9 +106,7 @@ class SearchScope:
         """
 
         def mkurl_pypi_url(url: str) -> str:
-            loc = posixpath.join(
-                url, urllib.parse.quote(canonicalize_name(project_name))
-            )
+            loc = posixpath.join(url, urllib.parse.quote(canonicalize_name(project_name)))
             # For maximum compatibility with easy_install, ensure the path
             # ends in a trailing slash.  Although this isn't in the spec
             # (and PyPI can handle it without the slash) some other index

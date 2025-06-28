@@ -89,9 +89,7 @@ def annotated_getattr(obj: object, name: str, ann: str) -> object:
     try:
         obj = getattr(obj, name)
     except AttributeError as e:
-        raise AttributeError(
-            f"{type(obj).__name__!r} object at {ann} has no attribute {name!r}"
-        ) from e
+        raise AttributeError(f"{type(obj).__name__!r} object at {ann} has no attribute {name!r}") from e
     return obj
 
 
@@ -271,9 +269,7 @@ class MonkeyPatch:
         if isinstance(name, Notset):
             if not isinstance(target, str):
                 raise TypeError(
-                    "use delattr(target, name) or "
-                    "delattr(target) with target being a dotted "
-                    "import string"
+                    "use delattr(target, name) or " "delattr(target) with target being a dotted " "import string"
                 )
             name, target = derive_importpath(target, raising)
 

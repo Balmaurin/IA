@@ -333,17 +333,10 @@ class ClientPerMessageDeflateFactory(ClientExtensionFactory):
         """
         if not (server_max_window_bits is None or 8 <= server_max_window_bits <= 15):
             raise ValueError("server_max_window_bits must be between 8 and 15")
-        if not (
-            client_max_window_bits is None
-            or client_max_window_bits is True
-            or 8 <= client_max_window_bits <= 15
-        ):
+        if not (client_max_window_bits is None or client_max_window_bits is True or 8 <= client_max_window_bits <= 15):
             raise ValueError("client_max_window_bits must be between 8 and 15")
         if compress_settings is not None and "wbits" in compress_settings:
-            raise ValueError(
-                "compress_settings must not include wbits, "
-                "set client_max_window_bits instead"
-            )
+            raise ValueError("compress_settings must not include wbits, " "set client_max_window_bits instead")
 
         self.server_no_context_takeover = server_no_context_takeover
         self.client_no_context_takeover = client_no_context_takeover
@@ -481,10 +474,7 @@ def enable_client_permessage_deflate(
     """
     if extensions is None:
         extensions = []
-    if not any(
-        extension_factory.name == ClientPerMessageDeflateFactory.name
-        for extension_factory in extensions
-    ):
+    if not any(extension_factory.name == ClientPerMessageDeflateFactory.name for extension_factory in extensions):
         extensions = list(extensions) + [
             ClientPerMessageDeflateFactory(
                 compress_settings={"memLevel": 5},
@@ -540,14 +530,10 @@ class ServerPerMessageDeflateFactory(ServerExtensionFactory):
         if not (client_max_window_bits is None or 8 <= client_max_window_bits <= 15):
             raise ValueError("client_max_window_bits must be between 8 and 15")
         if compress_settings is not None and "wbits" in compress_settings:
-            raise ValueError(
-                "compress_settings must not include wbits, "
-                "set server_max_window_bits instead"
-            )
+            raise ValueError("compress_settings must not include wbits, " "set server_max_window_bits instead")
         if client_max_window_bits is None and require_client_max_window_bits:
             raise ValueError(
-                "require_client_max_window_bits is enabled, "
-                "but client_max_window_bits isn't configured"
+                "require_client_max_window_bits is enabled, " "but client_max_window_bits isn't configured"
             )
 
         self.server_no_context_takeover = server_no_context_takeover
@@ -683,10 +669,7 @@ def enable_server_permessage_deflate(
     """
     if extensions is None:
         extensions = []
-    if not any(
-        ext_factory.name == ServerPerMessageDeflateFactory.name
-        for ext_factory in extensions
-    ):
+    if not any(ext_factory.name == ServerPerMessageDeflateFactory.name for ext_factory in extensions):
         extensions = list(extensions) + [
             ServerPerMessageDeflateFactory(
                 server_max_window_bits=12,
