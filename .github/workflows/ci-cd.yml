@@ -128,6 +128,39 @@ jobs:
   # Build and push Docker images
   build:
     name: Build and Push Images
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Build and push backend image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile.backend
+        push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}-backend:latest
+    
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./web
+        file: ./web/Dockerfile
+        push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}-frontend:latest
+
+  # Deploy application
   deploy:
     needs: [backend, frontend]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
@@ -139,7 +172,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python ${{ vars.PYTHON_VERSION }}
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
@@ -149,7 +182,7 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
-    - name: Install Node.js ${{ vars.NODE_VERSION }}
+    - name: Install Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
@@ -184,7 +217,9 @@ jobs:
     - name: Add known hosts
       run: |
         mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.SSH_HOST || 'example.com' }} >> ~/.ssh/known_hosts
+        if [ -n "${{ secrets.SSH_HOST }}" ]; then
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        fi
 
     - name: Deploy to production
       run: |
