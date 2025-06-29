@@ -1,0 +1,39 @@
+name: Dependabot Auto-approve and Merge
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [ opened, reopened, synchronize ]
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Approve Dependabot PRs
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: |
+          curl -sSL \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}\" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/reviews" \
+            -d '{"event":"APPROVE"}'
+
+      - name: Enable auto-merge for Dependabot PRs
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: |
+          curl -sSL \
+            -X PUT \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}\" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge" \
+            -d '{"merge_method":"squash"}'

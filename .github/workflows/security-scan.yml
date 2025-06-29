@@ -1,0 +1,142 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly scan
+
+# Environment variables
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+  POSTGRES_VERSION: '15-alpine'
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Python Security Scan
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Python security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit semgrep pip-audit
+
+    - name: Run Python dependency check (safety)
+      run: |
+        echo "Running safety check..."
+        safety check --full-report || echo "Safety check found vulnerabilities"
+
+    - name: Run Python dependency audit (pip-audit)
+      run: |
+        echo "Running pip-audit..."
+        pip-audit || echo "pip-audit found vulnerabilities"
+
+    - name: Run Python static code analysis (bandit)
+      run: |
+        echo "Running bandit..."
+        if [ -d "apps/sheily_light_api" ]; then
+          bandit -r apps/sheily_light_api -x tests/ -ll || echo "Bandit found issues"
+        fi
+
+    # Node.js Security Scan
+    - name: Set up Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Run npm audit
+      working-directory: ./web
+      run: |
+        echo "Running npm audit..."
+        npm audit --production || echo "npm audit found vulnerabilities"
+
+    # Container Security Scan
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image for scanning
+      run: |
+        echo "Building Docker image for security scanning..."
+        docker build -t sheily-api:security-scan -f apps/sheily_light_api/Dockerfile .
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'sheily-api:security-scan'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    # Secret Scanning
+    - name: Run TruffleHog
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        since_commit: ${{ github.event.before }}
+        head: ${{ github.event.after }}
+        debug: true
+
+    # Dependency Graph Analysis
+    - name: Update dependency graph
+      uses: actions/dependency-review-action@v3
+      with:
+        fail-on-severity: 'high'
+
+    - name: Install Node.js dependencies
+      working-directory: ./web
+      run: npm ci
+
+    - name: Run npm audit
+      working-directory: ./web
+      run: npm audit --production
+
+    - name: Run Snyk for vulnerability scanning
+      uses: snyk/actions/node@master
+      continue-on-error: true
+      with:
+        command: monitor
+        args: --all-projects --severity-threshold=high
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+    # Container Security Scan
+    - name: Build Docker images
+      run: |
+        docker-compose -f docker-compose.yml build
+
+    - name: Scan Docker images with Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'sheily_web:latest'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'

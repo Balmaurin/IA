@@ -3,7 +3,14 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from contextlib import contextmanager
 import os
 
+# Debug: Print environment variables
+print("Environment variables:")
+for key, value in os.environ.items():
+    if "DATABASE" in key or "DB" in key:
+        print(f"{key}: {value}")
+
 DB_URL = os.getenv("DATABASE_URL", "sqlite:///sheily.db")
+print(f"Using database URL: {DB_URL}")
 
 engine = create_engine(
     DB_URL, echo=False, connect_args={"check_same_thread": False} if DB_URL.startswith("sqlite") else {}

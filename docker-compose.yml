@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  api:
+    build:
+      context: ./apps/sheily_light_api
+      dockerfile: Dockerfile
+    container_name: sheily_api
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/sheily_light_api:/app
+    depends_on:
+      - postgres
+    networks:
+      - sheily_network
+
+  # Frontend Service
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: sheily_web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - sheily_network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sheily_db
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    networks:
+      - sheily_network
+
+  # PGAdmin (Optional, for database management)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: sheily_pgadmin
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@sheily.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - sheily_network
+
+volumes:
+  postgres_data:
+
+networks:
+  sheily_network:
+    driver: bridge

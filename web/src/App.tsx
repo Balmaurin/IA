@@ -8,6 +8,7 @@ import { router } from '@/routes';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { DialogProvider } from '@/components/ui/dialog';
 import { Tooltip } from '@/components/ui/tooltip';
+import { AuthProvider } from '@/hooks/use-auth';
 
 // Importar estilos globales
 import '@/styles/globals.css';
@@ -17,8 +18,9 @@ function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="sheily-theme">
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <DialogProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <DialogProvider>
             <div className="min-h-screen bg-background font-sans antialiased">
               <RouterProvider router={router} />
               <Toaster
@@ -42,6 +44,7 @@ function App() {
           </DialogProvider>
         </TooltipProvider>
       </QueryClientProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </ThemeProvider>
   );
 }

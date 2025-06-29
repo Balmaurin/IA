@@ -49,24 +49,35 @@ def register_user(payload: Dict[str, str]) -> Dict[str, str]:
 
     db = SessionLocal()
     try:
+        print(f"Attempting to register user: {username}")
         # Check if user already exists
-        if _get_user(db, username):
+        existing_user = _get_user(db, username)
+        if existing_user:
+            print(f"User {username} already exists")
             return {"error": "Username already exists"}
 
         # Create new user
-        user = User(username=username, hashed_password=pwd_context.hash(password))
+        hashed_password = pwd_context.hash(password)
+        print(f"Creating user with username: {username}")
+        user = User(username=username, hashed_password=hashed_password)
 
         db.add(user)
+        print("Committing transaction...")
         db.commit()
         db.refresh(user)
+        print(f"User {username} registered successfully with ID {user.id}")
         return {"detail": "User registered successfully"}
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         db.rollback()
-        return {"error": "Registration failed due to a database error"}
-    except (ValueError, TypeError) as e:
+        error_msg = f"Database error during registration: {str(e)}"
+        print(error_msg)
+        return {"error": error_msg}
+    except Exception as e:
         db.rollback()
-        return {"error": f"Invalid input: {str(e)}"}
+        error_msg = f"Unexpected error during registration: {str(e)}"
+        print(error_msg)
+        return {"error": error_msg}
     finally:
         db.close()
 
