@@ -83,7 +83,7 @@ jobs:
       run: |
         bandit -r apps/sheily_light_api -x tests
 
-  # Frontend job
+  # Frontend job - CI/CD Workflow
   frontend:
     name: Frontend (Node.js)
     runs-on: ubuntu-latest
