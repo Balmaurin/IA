@@ -10,19 +10,11 @@ on:
 env:
   # Application settings
   APP_NAME: sheily
-  DOCKER_BUILDKIT: 1
-  COMPOSE_DOCKER_CLI_BUILD: 1
   
   # Version settings
   NODE_VERSION: '20'
   PYTHON_VERSION: '3.11'
   POSTGRES_VERSION: '15-alpine'
-  
-  # AWS Settings (defaults, overridden by environment secrets)
-  AWS_REGION: 'us-east-1'
-  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'sheily' }}
-  ECS_CLUSTER: ${{ vars.ECS_CLUSTER || 'sheily-cluster' }}
-  ECS_SERVICE: ${{ vars.ECS_SERVICE || 'sheily-service' }}
 
 # Job configurations
 jobs:
@@ -125,9 +117,9 @@ jobs:
         npm install -g codecov
         codecov -t ${{ secrets.CODECOV_TOKEN }}
 
-  # Build and push Docker images
+  # Build job
   build:
-    name: Build and Push Images
+    name: Build
     needs: [backend, frontend]
     runs-on: ubuntu-latest
     
@@ -138,27 +130,21 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
       
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
-    - name: Build and push backend image
+    - name: Build backend image
       uses: docker/build-push-action@v4
       with:
         context: .
         file: ./Dockerfile.backend
-        push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}-backend:latest
+        push: false
+        tags: ${{ env.APP_NAME }}-backend:local
     
-    - name: Build and push frontend image
+    - name: Build frontend image
       uses: docker/build-push-action@v4
       with:
         context: ./web
         file: ./web/Dockerfile
-        push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}-frontend:latest
+        push: false
+        tags: ${{ env.APP_NAME }}-frontend:local
 
   # Deploy application
   deploy:
