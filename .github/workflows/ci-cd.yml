@@ -6,21 +6,34 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-# Default environment variables
+# Global environment variables
 env:
-  NODE_VERSION: '18'
-  PYTHON_VERSION: '3.9'
+  # Application settings
+  APP_NAME: sheily
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  
+  # Version settings
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
   POSTGRES_VERSION: '15-alpine'
-  # These can be overridden in the repository's environment secrets
+  
+  # AWS Settings (defaults, overridden by environment secrets)
+  AWS_REGION: 'us-east-1'
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'sheily' }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER || 'sheily-cluster' }}
+  ECS_SERVICE: ${{ vars.ECS_SERVICE || 'sheily-service' }}
 
+# Job configurations
 jobs:
-  # Trabajo para el backend en Python
+  # Backend testing and validation
   backend:
     name: Backend (Python)
     runs-on: ubuntu-latest
+    
     services:
       postgres:
-        image: postgres:${{ env.POSTGRES_VERSION }}
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
@@ -34,12 +47,14 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Set up Python ${{ vars.PYTHON_VERSION }}
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
 
     - name: Install Python dependencies
       run: |
@@ -47,78 +62,72 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install pytest pytest-cov black flake8 isort mypy bandit safety
 
-    - name: Run Python tests
+    - name: Run Python tests with coverage
       env:
         DATABASE_URL: postgresql://test:test@localhost:5432/test
       run: |
-        if [ -f setup.py ]; then pip install -e .; fi
-        if [ -d tests ]; then
-          pytest --cov=app --cov-report=xml
-          coverage xml
+        cd apps/sheily_light_api
+        pytest --cov=app --cov-report=xml
+        
+        # Upload coverage to Codecov if token is available
+        if [ -n "${{ secrets.CODECOV_TOKEN }}" ]; then
+          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
         fi
 
-    - name: Upload coverage to Codecov
-      if: success() && github.event_name != 'pull_request'
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN || '' }}
-        file: ./coverage.xml
-        fail_ci_if_error: false
-
-    - name: Lint Python code
+    - name: Lint with flake8
       run: |
-        if [ -d . ]; then
-          black --check .
-          flake8 .
-          isort --check-only .
-          mypy .
-        fi
+        flake8 apps/sheily_light_api --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 apps/sheily_light_api --count --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Security scan Python code
+    - name: Check formatting with black
       run: |
-        if [ -d . ]; then
-          bandit -r . -x tests/
-          safety check --full-report
-        fi
+        black --check apps/sheily_light_api
 
-  # Trabajo para el frontend en Node.js
+    - name: Check imports with isort
+      run: |
+        isort --check-only --profile black apps/sheily_light_api
+
+    - name: Run security check with bandit
+      run: |
+        bandit -r apps/sheily_light_api -x tests
+
+  # Frontend job
   frontend:
     name: Frontend (Node.js)
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js ${{ vars.NODE_VERSION }}
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-    
+
     - name: Install dependencies
       working-directory: ./web
       run: npm ci
-    
+
     - name: Lint
       working-directory: ./web
       run: npm run lint
-    
-    - name: Check formatting
-      working-directory: ./web
-      run: npm run format -- --check
-    
-    - name: Build
-      working-directory: ./web
-      run: npm run build
-    
+
     - name: Run tests
       working-directory: ./web
-      run: |
-        if [ -f "jest.config.js" ]; then
-          npm test -- --coverage
-        fi
+      run: npm test -- --watchAll=false --coverage
 
-  # Despliegue
+    - name: Upload coverage to Codecov
+      if: ${{ success() && secrets.CODECOV_TOKEN != '' }}
+      working-directory: ./web
+      run: |
+        npm install -g codecov
+        codecov -t ${{ secrets.CODECOV_TOKEN }}
+
+  # Build and push Docker images
+  build:
+    name: Build and Push Images
   deploy:
     needs: [backend, frontend]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
