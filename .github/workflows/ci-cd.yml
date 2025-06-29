@@ -97,11 +97,17 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: 'web/package-lock.json'
+        cache-dependency-path: '**/package-lock.json'
 
     - name: Install dependencies
       working-directory: ./web
-      run: npm ci
+      run: |
+        npm ci
+        # Create a symbolic link to the node_modules directory in the root
+        # to help with tools that expect node_modules in the root
+        if [ ! -d "../node_modules" ]; then
+          ln -s web/node_modules ../node_modules
+        fi
 
     - name: Lint
       working-directory: ./web
