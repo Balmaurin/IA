@@ -111,7 +111,7 @@ jobs:
       run: npm test -- --watchAll=false --coverage
 
     - name: Upload coverage to Codecov
-      if: ${{ success() && secrets.CODECOV_TOKEN != '' }}
+      if: success() && github.event_name != 'pull_request' && secrets.CODECOV_TOKEN != ''
       working-directory: ./web
       run: |
         npm install -g codecov
